@@ -1,3 +1,9 @@
+<p align="center">
+  <img src="docs/fstp-baner.png" alt="FSTP — Federated Sovereign Transport Protocol" width="100%"/>
+</p>
+
+
+
 # FSTP — Federated Sovereign Transport Protocol
 
 [![CI](https://github.com/rsotoc/fstp/actions/workflows/ci.yml/badge.svg)](https://github.com/rsotoc/fstp/actions/workflows/ci.yml)
