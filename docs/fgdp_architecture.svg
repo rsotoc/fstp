@@ -1,0 +1,230 @@
+<svg width="680" viewBox="0 0 680 740" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>FGDP Architecture Diagram</title>
+<desc>Two institutional nodes each containing a pod, Blocklace DAG, and synchronization agent. The sync agents exchange typed messages with a central federation relay. No raw data crosses node boundaries.</desc>
+
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+  <style>
+    text { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; fill: #1a1a1a; }
+    .th  { font-size: 13px; font-weight: 600; }
+    .ts  { font-size: 11px; font-weight: 400; fill: #444; }
+
+    /* Node container — teal */
+    .node-container rect { fill: #E1F5EE; stroke: #0F6E56; }
+    .node-title { fill: #085041; font-size: 13px; font-weight: 600; }
+
+    /* Pod — blue */
+    .pod rect { fill: #E6F1FB; stroke: #185FA5; }
+    .pod .th  { fill: #0C447C; }
+    .pod .ts  { fill: #185FA5; }
+
+    /* Blocklace — purple */
+    .blocklace rect.bg { fill: #EEEDFE; stroke: #534AB7; }
+    .blocklace .th { fill: #26215C; }
+    .blocklace .ts { fill: #534AB7; }
+
+    /* DAG blocks */
+    .dag-block { fill: none; stroke: #534AB7; stroke-width: 0.5; }
+    .dag-block-text { font-size: 10px; fill: #3C3489; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .dag-arrow { stroke: #7F77DD; stroke-width: 0.8; fill: none; }
+    .dag-dangling { fill: none; stroke: #534AB7; stroke-width: 0.5; stroke-dasharray: 3 2; opacity: 0.5; }
+    .dag-dangling-text { font-size: 10px; fill: #534AB7; opacity: 0.5; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .dag-annotation { font-size: 9px; fill: #7F77DD; opacity: 0.7; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+
+    /* Sync agent — amber */
+    .syncagent rect { fill: #FAEEDA; stroke: #BA7517; }
+    .syncagent .th { fill: #412402; }
+    .syncagent .ts { fill: #854F0B; }
+
+    /* Federation relay — gray */
+    .federation rect { fill: #F1EFE8; stroke: #5F5E5A; }
+    .federation .th { fill: #2C2C2A; }
+    .federation .ts { fill: #5F5E5A; }
+
+    /* Arrows */
+    .fed-link { stroke: #5F5E5A; stroke-width: 1; stroke-dasharray: 5 3; fill: none; }
+    .int-arrow { stroke: #888780; stroke-width: 0.8; fill: none; }
+
+    /* Legend / labels */
+    .label-box { fill: #f8f7f4; stroke: #D3D1C7; stroke-width: 0.5; }
+    .label-text { font-size: 10px; fill: #444; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .legend-text { font-size: 10px; fill: #2C2C2A; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .caption-text { font-size: 10px; fill: #444; font-style: italic; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .divider { stroke: #D3D1C7; stroke-width: 0.5; }
+  </style>
+</defs>
+
+<!-- ═══════════════════════════════════════════
+     NODE A  (left, x=20..310)
+════════════════════════════════════════════ -->
+<g class="node-container">
+  <rect x="20" y="40" width="290" height="310" rx="14" stroke-width="0.5"/>
+</g>
+<text class="node-title" x="165" y="66" text-anchor="middle" dominant-baseline="central">Node A</text>
+
+<!-- Pod A -->
+<g class="pod">
+  <rect x="36" y="82" width="258" height="68" rx="8" stroke-width="0.5"/>
+  <text class="th" x="165" y="107" text-anchor="middle" dominant-baseline="central">Pod</text>
+  <text class="ts" x="165" y="125" text-anchor="middle" dominant-baseline="central">Encrypted data store · AES-256-GCM · Argon2id</text>
+</g>
+
+<!-- Blocklace A -->
+<g class="blocklace">
+  <rect class="bg" x="36" y="164" width="258" height="110" rx="8" stroke-width="0.5"/>
+  <text class="th" x="165" y="183" text-anchor="middle" dominant-baseline="central">Blocklace</text>
+  <text class="ts" x="165" y="199" text-anchor="middle" dominant-baseline="central">Governance event log · partial order DAG</text>
+</g>
+<!-- DAG blocks A: b0 → b1 → b2 → b* (dangling) -->
+<rect class="dag-block" x="52" y="210" width="34" height="20" rx="3"/>
+<text class="dag-block-text" x="69" y="223" text-anchor="middle" dominant-baseline="central">b₀</text>
+<rect class="dag-block" x="108" y="210" width="34" height="20" rx="3"/>
+<text class="dag-block-text" x="125" y="223" text-anchor="middle" dominant-baseline="central">b₁</text>
+<rect class="dag-block" x="164" y="210" width="34" height="20" rx="3"/>
+<text class="dag-block-text" x="181" y="223" text-anchor="middle" dominant-baseline="central">b₂</text>
+<rect class="dag-dangling" x="220" y="210" width="34" height="20" rx="3"/>
+<text class="dag-dangling-text" x="237" y="223" text-anchor="middle" dominant-baseline="central">b*</text>
+<!-- hash pointer arrows -->
+<line class="dag-arrow" x1="87" y1="220" x2="106" y2="220" marker-end="url(#arr)"/>
+<line class="dag-arrow" x1="143" y1="220" x2="162" y2="220" marker-end="url(#arr)"/>
+<line x1="199" y1="220" x2="218" y2="220" stroke="#7F77DD" stroke-width="0.8" fill="none" stroke-dasharray="3 2" opacity="0.5" marker-end="url(#arr)"/>
+<!-- h labels -->
+<text class="dag-annotation" x="96" y="215" text-anchor="middle">h</text>
+<text class="dag-annotation" x="152" y="215" text-anchor="middle">h</text>
+<text class="dag-annotation" x="208" y="215" text-anchor="middle" opacity="0.5">h</text>
+<!-- dangling annotation -->
+<text class="dag-annotation" x="237" y="244" text-anchor="middle">dangling pointer</text>
+<line x1="237" y1="231" x2="237" y2="239" stroke="#7F77DD" stroke-width="0.5" opacity="0.5"/>
+<text class="dag-annotation" x="237" y="255" text-anchor="middle">(content erased)</text>
+
+<!-- Sync agent A -->
+<g class="syncagent">
+  <rect x="36" y="288" width="258" height="44" rx="8" stroke-width="0.5"/>
+  <text class="th" x="165" y="308" text-anchor="middle" dominant-baseline="central">Sync agent</text>
+  <text class="ts" x="165" y="324" text-anchor="middle" dominant-baseline="central">Protocol boundary · closed message type list</text>
+</g>
+
+<!-- Internal arrows A -->
+<line class="int-arrow" x1="165" y1="151" x2="165" y2="162" marker-end="url(#arr)"/>
+<line class="int-arrow" x1="165" y1="275" x2="165" y2="286" marker-end="url(#arr)"/>
+
+<!-- ═══════════════════════════════════════════
+     NODE B  (right, x=370..660)
+════════════════════════════════════════════ -->
+<g class="node-container">
+  <rect x="370" y="40" width="290" height="310" rx="14" stroke-width="0.5"/>
+</g>
+<text class="node-title" x="515" y="66" text-anchor="middle" dominant-baseline="central">Node B</text>
+
+<!-- Pod B -->
+<g class="pod">
+  <rect x="386" y="82" width="258" height="68" rx="8" stroke-width="0.5"/>
+  <text class="th" x="515" y="107" text-anchor="middle" dominant-baseline="central">Pod</text>
+  <text class="ts" x="515" y="125" text-anchor="middle" dominant-baseline="central">Encrypted data store · AES-256-GCM · Argon2id</text>
+</g>
+
+<!-- Blocklace B -->
+<g class="blocklace">
+  <rect class="bg" x="386" y="164" width="258" height="110" rx="8" stroke-width="0.5"/>
+  <text class="th" x="515" y="183" text-anchor="middle" dominant-baseline="central">Blocklace</text>
+  <text class="ts" x="515" y="199" text-anchor="middle" dominant-baseline="central">Governance event log · partial order DAG</text>
+</g>
+<!-- DAG blocks B: fork b0 → {b1, b2} → b3 (concurrent events) -->
+<rect class="dag-block" x="402" y="210" width="34" height="20" rx="3"/>
+<text class="dag-block-text" x="419" y="223" text-anchor="middle" dominant-baseline="central">b₀</text>
+<!-- branch 1 (upper) -->
+<rect class="dag-block" x="458" y="202" width="34" height="20" rx="3"/>
+<text class="dag-block-text" x="475" y="215" text-anchor="middle" dominant-baseline="central">b₁</text>
+<!-- branch 2 (lower) -->
+<rect class="dag-block" x="458" y="228" width="34" height="20" rx="3"/>
+<text class="dag-block-text" x="475" y="241" text-anchor="middle" dominant-baseline="central">b₂</text>
+<!-- merge -->
+<rect class="dag-block" x="514" y="210" width="34" height="20" rx="3"/>
+<text class="dag-block-text" x="531" y="223" text-anchor="middle" dominant-baseline="central">b₃</text>
+<!-- arrows fork -->
+<path class="dag-arrow" d="M437 217 L456 210" marker-end="url(#arr)"/>
+<path class="dag-arrow" d="M437 225 L456 234" marker-end="url(#arr)"/>
+<path class="dag-arrow" d="M493 210 L512 218" marker-end="url(#arr)"/>
+<path class="dag-arrow" d="M493 236 L512 224" marker-end="url(#arr)"/>
+<!-- concurrent annotation -->
+<text class="dag-annotation" x="475" y="258" text-anchor="middle">b₁ ‖ b₂ concurrent</text>
+<text class="dag-annotation" x="475" y="268" text-anchor="middle">(no serialization)</text>
+
+<!-- Sync agent B -->
+<g class="syncagent">
+  <rect x="386" y="288" width="258" height="44" rx="8" stroke-width="0.5"/>
+  <text class="th" x="515" y="308" text-anchor="middle" dominant-baseline="central">Sync agent</text>
+  <text class="ts" x="515" y="324" text-anchor="middle" dominant-baseline="central">Protocol boundary · closed message type list</text>
+</g>
+
+<!-- Internal arrows B -->
+<line class="int-arrow" x1="515" y1="151" x2="515" y2="162" marker-end="url(#arr)"/>
+<line class="int-arrow" x1="515" y1="275" x2="515" y2="286" marker-end="url(#arr)"/>
+
+<!-- ═══════════════════════════════════════════
+     FEDERATION RELAY  (center, y=390..466)
+════════════════════════════════════════════ -->
+<g class="federation">
+  <rect x="220" y="390" width="240" height="76" rx="12" stroke-width="0.5"/>
+  <text class="th" x="340" y="416" text-anchor="middle" dominant-baseline="central">Federation</text>
+  <text class="ts" x="340" y="434" text-anchor="middle" dominant-baseline="central">Event hashes · credentials · link events</text>
+  <text class="ts" x="340" y="452" text-anchor="middle" dominant-baseline="central">No raw pod data crosses this boundary</text>
+</g>
+
+<!-- ═══════════════════════════════════════════
+     FEDERATION LINK ARROWS
+════════════════════════════════════════════ -->
+<path class="fed-link" d="M 165 333 L 165 368 L 270 390" marker-end="url(#arr)"/>
+<path class="fed-link" d="M 515 333 L 515 368 L 410 390" marker-end="url(#arr)"/>
+
+<!-- Message type labels -->
+<rect class="label-box" x="34" y="352" width="126" height="30" rx="4"/>
+<text class="label-text" x="97" y="362" text-anchor="middle" dominant-baseline="central">GovernanceHash</text>
+<text class="label-text" x="97" y="376" text-anchor="middle" dominant-baseline="central">FederationLink</text>
+
+<rect class="label-box" x="520" y="352" width="126" height="30" rx="4"/>
+<text class="label-text" x="583" y="362" text-anchor="middle" dominant-baseline="central">VerifiableCredential</text>
+<text class="label-text" x="583" y="376" text-anchor="middle" dominant-baseline="central">ModerationParams</text>
+
+<!-- ═══════════════════════════════════════════
+     LEGEND
+════════════════════════════════════════════ -->
+<line class="divider" x1="20" y1="496" x2="660" y2="496"/>
+
+<!-- col 1 -->
+<rect x="20" y="508" width="11" height="11" rx="2" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text class="legend-text" x="36" y="516" dominant-baseline="central">Pod — encrypted data store</text>
+
+<rect x="20" y="526" width="11" height="11" rx="2" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text class="legend-text" x="36" y="534" dominant-baseline="central">Blocklace — partial order DAG log</text>
+
+<rect x="20" y="544" width="11" height="11" rx="2" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
+<text class="legend-text" x="36" y="552" dominant-baseline="central">Sync agent — protocol boundary</text>
+
+<rect x="20" y="562" width="11" height="11" rx="2" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text class="legend-text" x="36" y="570" dominant-baseline="central">Institutional node</text>
+
+<!-- col 2 -->
+<line x1="340" y1="512" x2="362" y2="512" stroke="#5F5E5A" stroke-width="1" stroke-dasharray="5 3" marker-end="url(#arr)"/>
+<text class="legend-text" x="368" y="516" dominant-baseline="central">Federation link (typed messages only)</text>
+
+<line x1="340" y1="530" x2="362" y2="530" stroke="#888780" stroke-width="0.8" marker-end="url(#arr)"/>
+<text class="legend-text" x="368" y="534" dominant-baseline="central">Internal data flow</text>
+
+<rect x="340" y="542" width="22" height="12" rx="2" fill="none" stroke="#534AB7" stroke-width="0.5"/>
+<text class="legend-text" x="368" y="550" dominant-baseline="central">Blocklace block</text>
+
+<rect x="340" y="560" width="22" height="12" rx="2" fill="none" stroke="#534AB7" stroke-width="0.5" stroke-dasharray="3 2" opacity="0.6"/>
+<text class="legend-text" x="368" y="568" dominant-baseline="central">Dangling pointer block (b*): hash persists, content erased</text>
+
+<!-- ═══════════════════════════════════════════
+     CAPTION
+════════════════════════════════════════════ -->
+<line class="divider" x1="20" y1="588" x2="660" y2="588"/>
+<text class="caption-text" x="340" y="604" text-anchor="middle" dominant-baseline="central">Fig. 1 — FGDP component architecture. Node B's Blocklace illustrates a fork (b₁ ‖ b₂) representing concurrent governance events with no</text>
+<text class="caption-text" x="340" y="619" text-anchor="middle" dominant-baseline="central">artificial serialization (Lemma 3.1). Node A shows a dangling pointer block (b*): content erased per GDPR Art. 17; structural integrity</text>
+<text class="caption-text" x="340" y="634" text-anchor="middle" dominant-baseline="central">of descendants preserved (Lemma 3.3). Federation relay exchanges only typed messages — no raw pod data crosses node boundaries.</text>
+
+</svg>

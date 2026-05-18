@@ -1,0 +1,37 @@
+[workspace]
+members = [
+    "crates/fstp-core",
+    "crates/fstp-agent",
+]
+resolver = "2"
+
+# Dependencias compartidas entre crates del workspace.
+# Cada crate las declara con workspace = true para garantizar
+# que todo el workspace use la misma versión.
+[workspace.dependencies]
+# Criptografía
+ed25519-dalek = { version = "2.1.1", features = ["serde", "rand_core"] }
+sha2           = "0.10.8"
+hkdf           = "0.12.4"
+aes-gcm        = "0.10.3"
+rand           = "0.8.5"
+hex            = "0.4.3"
+
+# Tipos y serialización
+uuid    = { version = "1.11.0", features = ["v4", "serde"] }
+chrono  = { version = "0.4.38", features = ["serde"] }
+serde   = { version = "1.0.215", features = ["derive"] }
+serde_json = "1.0.133"
+thiserror  = "1.0.69"
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Observabilidad
+tracing            = "0.1"
+tracing-subscriber = "0.3.23"
+
+# Tests
+criterion = { version = "0.5.1", features = ["html_reports"] }
+proptest  = "1.5.0"
+

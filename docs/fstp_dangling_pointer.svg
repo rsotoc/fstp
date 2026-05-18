@@ -1,0 +1,966 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="680"
+   viewBox="0 0 680 428.40637"
+   role="img"
+   font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+   version="1.1"
+   id="svg16789"
+   sodipodi:docname="fstp_dangling_pointer.svg"
+   height="428.40637"
+   inkscape:version="1.2.1 (9c6d41e4, 2022-07-14)"
+   inkscape:export-filename="fstp_dangling_pointer.pdf"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <sodipodi:namedview
+     id="namedview16791"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="0.89467761"
+     inkscape:cx="326.93341"
+     inkscape:cy="266.57647"
+     inkscape:window-width="1367"
+     inkscape:window-height="703"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg16789" />
+  <title
+     id="title16594">FSTP Blocklace — Dangling pointer erasure mechanism</title>
+  <desc
+     id="desc16596">Diagram showing a Blocklace before and after a GDPR erasure request. On the left, a chain of four blocks b1 through b4 where block b2 contains personal data event e2. On the right, after erasure, e2 is deleted from the data store while block b2 remains as a dangling pointer in the Blocklace. Blocks b3 and b4 remain tamper-evident.</desc>
+  <defs
+     id="defs16607">
+    <marker
+       id="arr"
+       viewBox="0 0 10 10"
+       refX="8"
+       refY="5"
+       markerWidth="6"
+       markerHeight="6"
+       orient="auto-start-reverse">
+      <path
+         d="M 2,1 8,5 2,9"
+         fill="none"
+         stroke="#5f5e5a"
+         stroke-width="1.5"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+         id="path16598" />
+    </marker>
+    <marker
+       id="arr-red"
+       viewBox="0 0 10 10"
+       refX="8"
+       refY="5"
+       markerWidth="6"
+       markerHeight="6"
+       orient="auto-start-reverse">
+      <path
+         d="M 2,1 8,5 2,9"
+         fill="none"
+         stroke="#a32d2d"
+         stroke-width="1.5"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+         id="path16601" />
+    </marker>
+    <marker
+       id="arr-gray"
+       viewBox="0 0 10 10"
+       refX="8"
+       refY="5"
+       markerWidth="6"
+       markerHeight="6"
+       orient="auto-start-reverse">
+      <path
+         d="M 2,1 8,5 2,9"
+         fill="none"
+         stroke="#888780"
+         stroke-width="1.5"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+         id="path16604" />
+    </marker>
+  </defs>
+  <!-- Background -->
+  <rect
+     width="680"
+     height="428.40637"
+     fill="#ffffff"
+     id="rect16609"
+     x="0"
+     y="0"
+     style="stroke-width:0.916522" />
+  <!-- ══ LEFT PANEL — Before erasure ══ -->
+  <text
+     x="145"
+     y="28"
+     text-anchor="middle"
+     font-size="14px"
+     font-weight="500"
+     fill="#2c2c2a"
+     id="text16611">Before erasure request</text>
+  <!-- Data store container -->
+  <rect
+     x="10"
+     y="42"
+     width="130"
+     height="278"
+     rx="8"
+     fill="#f1efe8"
+     stroke="#888780"
+     stroke-width="0.5"
+     stroke-dasharray="4, 3"
+     id="rect16613" />
+  <text
+     x="75"
+     y="62"
+     text-anchor="middle"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text16615">Data store</text>
+  <!-- e1 -->
+  <rect
+     x="22"
+     y="74"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#e1f5ee"
+     stroke="#0f6e56"
+     stroke-width="0.5"
+     id="rect16617" />
+  <g
+     id="g17462"
+     transform="translate(-10.078008,-3.0076753)">
+    <text
+       x="85"
+       y="87"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#085041"
+       id="text16619">e₁</text>
+    <text
+       x="85"
+       y="102"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#0f6e56"
+       id="text16621">Governance event</text>
+  </g>
+  <!-- e2 personal data -->
+  <rect
+     x="22"
+     y="120"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#faeeda"
+     stroke="#854f0b"
+     stroke-width="0.5"
+     id="rect16623" />
+  <g
+     id="g17484"
+     transform="translate(-10.174011,-2.9776753)">
+    <text
+       x="85"
+       y="133"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#633806"
+       id="text16625">e₂</text>
+    <text
+       x="85"
+       y="148"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#854f0b"
+       id="text16627">Personal data ⚠</text>
+  </g>
+  <!-- e3 -->
+  <rect
+     x="22"
+     y="166"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#e1f5ee"
+     stroke="#0f6e56"
+     stroke-width="0.5"
+     id="rect16629" />
+  <g
+     id="g17506"
+     transform="translate(-10.078008,-3.0076753)">
+    <text
+       x="85"
+       y="179"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#085041"
+       id="text16631">e₃</text>
+    <text
+       x="85"
+       y="194"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#0f6e56"
+       id="text16633">Governance event</text>
+  </g>
+  <!-- e4 -->
+  <rect
+     x="22"
+     y="212"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#e1f5ee"
+     stroke="#0f6e56"
+     stroke-width="0.5"
+     id="rect16635" />
+  <g
+     id="g17440"
+     transform="translate(-10.078008,-3.0076753)">
+    <text
+       x="85"
+       y="225"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#085041"
+       id="text16637">e₄</text>
+    <text
+       x="85"
+       y="240"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#0f6e56"
+       id="text16639">Governance event</text>
+  </g>
+  <!-- personal data legend badge -->
+  <g
+     id="g17418"
+     transform="translate(-10)">
+    <rect
+       x="32"
+       y="264"
+       width="106"
+       height="43.085091"
+       rx="4"
+       fill="#f1efe8"
+       stroke="#888780"
+       stroke-width="0.5"
+       id="rect16641" />
+  </g>
+  <text
+     x="76.635864"
+     y="270.91125"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="11px"
+     fill="#5f5e5a"
+     id="text16643"><tspan
+       sodipodi:role="line"
+       id="tspan17411"
+       x="76.635864"
+       y="270.91125">⚠</tspan><tspan
+       sodipodi:role="line"
+       id="tspan17413"
+       x="76.635864"
+       y="284.66125">contains</tspan><tspan
+       sodipodi:role="line"
+       x="76.635864"
+       y="298.41125"
+       id="tspan17415">personal data</tspan></text>
+  <!-- Blocklace container (left) -->
+  <rect
+     x="160"
+     y="42"
+     width="130"
+     height="278"
+     rx="8"
+     fill="#f1efe8"
+     stroke="#888780"
+     stroke-width="0.5"
+     stroke-dasharray="4, 3"
+     id="rect16645" />
+  <text
+     x="225"
+     y="62"
+     text-anchor="middle"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text16647">Blocklace</text>
+  <!-- b1 -->
+  <rect
+     x="172"
+     y="74"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#e6f1fb"
+     stroke="#185fa5"
+     stroke-width="0.5"
+     id="rect16649" />
+  <g
+     id="g17528"
+     transform="translate(-10.456008,-2.8126753)">
+    <text
+       x="235"
+       y="87"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#0c447c"
+       id="text16651">b₁</text>
+    <text
+       x="235"
+       y="102"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#185fa5"
+       id="text16653">H(e₁) · σ</text>
+  </g>
+  <!-- b2 amber -->
+  <rect
+     x="172"
+     y="120"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#faeeda"
+     stroke="#854f0b"
+     stroke-width="0.5"
+     id="rect16655" />
+  <g
+     id="g17550"
+     transform="translate(-10)">
+    <text
+       x="235"
+       y="133"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#633806"
+       id="text16657">b₂</text>
+    <text
+       x="235"
+       y="148"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#854f0b"
+       id="text16659">H(e₂) · σ</text>
+  </g>
+  <!-- b3 -->
+  <rect
+     x="172"
+     y="166"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#e6f1fb"
+     stroke="#185fa5"
+     stroke-width="0.5"
+     id="rect16661" />
+  <g
+     id="g17572"
+     transform="translate(-10.456008,-2.8126753)">
+    <text
+       x="235"
+       y="179"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#0c447c"
+       id="text16663">b₃</text>
+    <text
+       x="235"
+       y="194"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#185fa5"
+       id="text16665">H(b₂)·H(e₃)·σ</text>
+  </g>
+  <!-- b4 -->
+  <rect
+     x="172"
+     y="212"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#e6f1fb"
+     stroke="#185fa5"
+     stroke-width="0.5"
+     id="rect16667" />
+  <g
+     id="g17594"
+     transform="translate(-10.456008,-2.8126753)">
+    <text
+       x="235"
+       y="225"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#0c447c"
+       id="text16669">b₄</text>
+    <text
+       x="235"
+       y="240"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#185fa5"
+       id="text16671">H(b₃)·H(e₄)·σ</text>
+  </g>
+  <!-- data store → blocklace arrows (left) -->
+  <line
+     x1="128"
+     y1="92"
+     x2="170"
+     y2="92"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arr)"
+     id="line16673"
+     style="stroke-width:1.5;stroke-dasharray:none" />
+  <line
+     x1="128"
+     y1="138"
+     x2="170"
+     y2="138"
+     stroke="#ba7517"
+     stroke-width="1"
+     marker-end="url(#arr)"
+     id="line16675"
+     style="stroke-width:1.5;stroke-dasharray:none" />
+  <line
+     x1="128"
+     y1="184"
+     x2="170"
+     y2="184"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arr)"
+     id="line16677"
+     style="stroke-width:1.5;stroke-dasharray:none" />
+  <line
+     x1="128"
+     y1="230"
+     x2="170"
+     y2="230"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arr)"
+     id="line16679"
+     style="stroke-width:1.5;stroke-dasharray:none" />
+  <!-- chain arrows left blocklace -->
+  <line
+     x1="225"
+     y1="110"
+     x2="225"
+     y2="118"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arr)"
+     id="line16681" />
+  <line
+     x1="225"
+     y1="156"
+     x2="225"
+     y2="164"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arr)"
+     id="line16683" />
+  <line
+     x1="225"
+     y1="202"
+     x2="225"
+     y2="210"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arr)"
+     id="line16685" />
+  <!-- ══ CENTER — erasure request ══ -->
+  <!-- transition arrow -->
+  <text
+     x="337.96399"
+     y="112"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#a32d2d"
+     id="text16693">erasure request</text>
+  <path
+     d="m 304.66253,147.22915 h 66"
+     fill="none"
+     stroke="#5f5e5a"
+     stroke-width="1.5"
+     marker-end="url(#arr)"
+     id="path16695" />
+  <text
+     x="338"
+     y="133"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text16699">delete e₂</text>
+  <!-- ══ RIGHT PANEL — After erasure ══ -->
+  <text
+     x="525"
+     y="28"
+     text-anchor="middle"
+     font-size="14px"
+     font-weight="500"
+     fill="#2c2c2a"
+     id="text16701">After erasure</text>
+  <!-- Data store container (right) -->
+  <rect
+     x="388"
+     y="42"
+     width="130"
+     height="278"
+     rx="8"
+     fill="#f1efe8"
+     stroke="#888780"
+     stroke-width="0.5"
+     stroke-dasharray="4, 3"
+     id="rect16703" />
+  <text
+     x="453"
+     y="62"
+     text-anchor="middle"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text16705">Data store</text>
+  <!-- e1 -->
+  <rect
+     x="400"
+     y="74"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#e1f5ee"
+     stroke="#0f6e56"
+     stroke-width="0.5"
+     id="rect16707" />
+  <text
+     x="453"
+     y="87"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="14px"
+     font-weight="500"
+     fill="#085041"
+     id="text16709">e₁</text>
+  <text
+     x="453"
+     y="102"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#0f6e56"
+     id="text16711">Governance event</text>
+  <!-- e2 deleted -->
+  <rect
+     x="400"
+     y="120"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#ffffff"
+     stroke="#a32d2d"
+     stroke-width="0.5"
+     stroke-dasharray="4, 3"
+     id="rect16713" />
+  <text
+     x="453"
+     y="140"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#a32d2d"
+     id="text16715">e₂ — deleted</text>
+  <!-- e3 -->
+  <rect
+     x="400"
+     y="166"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#e1f5ee"
+     stroke="#0f6e56"
+     stroke-width="0.5"
+     id="rect16717" />
+  <text
+     x="453"
+     y="179"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="14px"
+     font-weight="500"
+     fill="#085041"
+     id="text16719">e₃</text>
+  <text
+     x="453"
+     y="194"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#0f6e56"
+     id="text16721">Governance event</text>
+  <!-- e4 -->
+  <rect
+     x="400"
+     y="212"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#e1f5ee"
+     stroke="#0f6e56"
+     stroke-width="0.5"
+     id="rect16723" />
+  <text
+     x="453"
+     y="225"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="14px"
+     font-weight="500"
+     fill="#085041"
+     id="text16725">e₄</text>
+  <text
+     x="453"
+     y="240"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#0f6e56"
+     id="text16727">Governance event</text>
+  <!-- Blocklace container (right) -->
+  <rect
+     x="538"
+     y="42"
+     width="130"
+     height="278"
+     rx="8"
+     fill="#f1efe8"
+     stroke="#888780"
+     stroke-width="0.5"
+     stroke-dasharray="4, 3"
+     id="rect16729" />
+  <text
+     x="603"
+     y="62"
+     text-anchor="middle"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text16731">Blocklace</text>
+  <!-- b1 -->
+  <rect
+     x="550"
+     y="74"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#e6f1fb"
+     stroke="#185fa5"
+     stroke-width="0.5"
+     id="rect16733" />
+  <text
+     x="603"
+     y="87"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="14px"
+     font-weight="500"
+     fill="#0c447c"
+     id="text16735">b₁</text>
+  <text
+     x="603"
+     y="102"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#185fa5"
+     id="text16737">H(e₁) · σ</text>
+  <!-- b2 dangling pointer -->
+  <rect
+     x="550"
+     y="120"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#f1efe8"
+     stroke="#888780"
+     stroke-width="0.5"
+     stroke-dasharray="4, 3"
+     id="rect16739" />
+  <text
+     x="603"
+     y="133"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="14px"
+     font-weight="500"
+     fill="#888780"
+     id="text16741">b₂</text>
+  <text
+     x="603"
+     y="148"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#888780"
+     id="text16743">H(e₂) · σ ⊘</text>
+  <!-- b3 valid -->
+  <rect
+     x="550"
+     y="166"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#e6f1fb"
+     stroke="#185fa5"
+     stroke-width="0.5"
+     id="rect16745" />
+  <text
+     x="603"
+     y="179"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="14px"
+     font-weight="500"
+     fill="#0c447c"
+     id="text16747">b₃</text>
+  <text
+     x="603"
+     y="194"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#185fa5"
+     id="text16749">H(b₂)·H(e₃)·σ</text>
+  <!-- b4 valid -->
+  <rect
+     x="550"
+     y="212"
+     width="106"
+     height="36"
+     rx="4"
+     fill="#e6f1fb"
+     stroke="#185fa5"
+     stroke-width="0.5"
+     id="rect16751" />
+  <text
+     x="603"
+     y="225"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="14px"
+     font-weight="500"
+     fill="#0c447c"
+     id="text16753">b₄</text>
+  <text
+     x="603"
+     y="240"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#185fa5"
+     id="text16755">H(b₃)·H(e₄)·σ</text>
+  <!-- data store → blocklace arrows (right) -->
+  <line
+     x1="506"
+     y1="92"
+     x2="548"
+     y2="92"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arr)"
+     id="line16757"
+     style="stroke-width:1.5;stroke-dasharray:none" />
+  <!-- e2 broken -->
+  <line
+     x1="506"
+     y1="138"
+     x2="548"
+     y2="138"
+     stroke="#888780"
+     stroke-width="1"
+     stroke-dasharray="4 3"
+     marker-end="url(#arr-gray)"
+     id="line16759"
+     style="stroke-width:1.5;stroke-dasharray:6, 4.5;stroke-dashoffset:0" />
+  <line
+     x1="506"
+     y1="184"
+     x2="548"
+     y2="184"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arr)"
+     id="line16761"
+     style="stroke-width:1.5;stroke-dasharray:none" />
+  <line
+     x1="506"
+     y1="230"
+     x2="548"
+     y2="230"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arr)"
+     id="line16763"
+     style="stroke-width:1.5;stroke-dasharray:none" />
+  <!-- chain arrows right blocklace — all intact -->
+  <line
+     x1="603"
+     y1="110"
+     x2="603"
+     y2="118"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arr)"
+     id="line16765" />
+  <line
+     x1="603"
+     y1="156"
+     x2="603"
+     y2="164"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arr)"
+     id="line16767" />
+  <line
+     x1="603"
+     y1="202"
+     x2="603"
+     y2="210"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arr)"
+     id="line16769" />
+  <!-- ══ PROPERTY BOX ══ -->
+  <rect
+     x="20"
+     y="330"
+     width="640"
+     height="60"
+     rx="8"
+     fill="#f1efe8"
+     stroke="#888780"
+     stroke-width="0.5"
+     id="rect16771" />
+  <text
+     x="340"
+     y="352"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="14px"
+     font-weight="500"
+     fill="#2c2c2a"
+     id="text16773">Property 3.7 — Erasure without integrity loss</text>
+  <text
+     x="340"
+     y="372"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text16775">b₂ persists as a dangling pointer: H(b₂) remains valid ⟹ b₃ and b₄ remain tamper-evident.</text>
+  <!-- ══ LEGEND ══ -->
+  <rect
+     x="20"
+     y="403.60202"
+     width="12"
+     height="12"
+     rx="2"
+     fill="#e1f5ee"
+     stroke="#0f6e56"
+     stroke-width="0.5"
+     id="rect16777" />
+  <text
+     x="38"
+     y="410.086"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text16779">Active event / valid block</text>
+  <rect
+     x="240"
+     y="403.60202"
+     width="12"
+     height="12"
+     rx="2"
+     fill="#f1efe8"
+     stroke="#888780"
+     stroke-width="0.5"
+     stroke-dasharray="3, 2"
+     id="rect16781" />
+  <text
+     x="258"
+     y="408.92801"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text16783">Dangling pointer (b₂ — block intact, content gone)</text>
+  <rect
+     x="530"
+     y="403.60202"
+     width="12"
+     height="12"
+     rx="2"
+     fill="#ffffff"
+     stroke="#a32d2d"
+     stroke-width="0.5"
+     stroke-dasharray="3, 2"
+     id="rect16785" />
+  <text
+     x="548"
+     y="409"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text16787">Erased content (e₂)</text>
+  <metadata
+     id="metadata17874">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>FSTP Blocklace — Dangling pointer erasure mechanism</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>

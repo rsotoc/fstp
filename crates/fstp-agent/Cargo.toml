@@ -1,0 +1,51 @@
+[package]
+name        = "fstp-agent"
+version     = "0.1.0"
+edition     = "2021"
+description = "FSTP Synchronization Agent — reference implementation binary"
+license     = "Apache-2.0"
+repository  = "https://github.com/rsotoc/fstp"
+homepage    = "https://github.com/rsotoc/fstp"
+documentation = "https://github.com/rsotoc/fstp/tree/main/docs"
+
+[[bin]]
+name = "fstp-agent"
+path = "src/main.rs"
+
+[dependencies]
+# Protocolo
+fstp-core = { path = "../fstp-core" }
+
+# Servidor HTTP y middleware
+axum        = "0.7.9"
+axum-server = { version = "0.7.1", features = ["tls-rustls"] }
+tower-http  = { version = "0.5.2", features = ["trace", "timeout"] }
+# native-tls: ClientBuilder::danger_accept_invalid_certs for FSTP_DEV_INSECURE_OUTBOUND
+reqwest     = { version = "0.12", default-features = false, features = ["json", "native-tls"] }
+
+# gRPC
+tonic = { version = "0.12.3", features = ["transport", "server", "codegen"] }
+prost = "0.13.3"
+
+# Tipos compartidos
+uuid       = { workspace = true }
+chrono     = { workspace = true }
+serde      = { workspace = true }
+serde_json = { workspace = true }
+thiserror  = { workspace = true }
+hex        = { workspace = true }
+rand       = { workspace = true }
+sha2       = { workspace = true }
+
+# Async y observabilidad
+tokio              = { workspace = true }
+tracing            = { workspace = true }
+tracing-subscriber = { workspace = true }
+ed25519-dalek = "2.2.0"
+
+[build-dependencies]
+tonic-build = "0.12.3"
+
+[dev-dependencies]
+criterion = { workspace = true }
+proptest  = { workspace = true }

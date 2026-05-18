@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/rsotoc/fstp/security/policy
+    about: Report privately per SECURITY.md — do not file a public issue for exploits

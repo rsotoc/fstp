@@ -1,0 +1,593 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1415.7191"
+   height="897.2533"
+   viewBox="0 0 1415.7191 897.2533"
+   version="1.1"
+   id="svg11552"
+   sodipodi:docname="fgdp_hero.svg"
+   inkscape:version="1.2.1 (9c6d41e4, 2022-07-14)"
+   inkscape:export-filename="fstp_hero.pdf"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview11554"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="0.46048898"
+     inkscape:cx="843.6684"
+     inkscape:cy="355.05736"
+     inkscape:window-width="1160"
+     inkscape:window-height="731"
+     inkscape:window-x="127"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg11552" />
+  <defs
+     id="defs11468">
+    <marker
+       style="overflow:visible"
+       id="Arrow1"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Arrow1"
+       markerWidth="4.0606604"
+       markerHeight="6.7071066"
+       viewBox="0 0 4.0606602 6.7071068"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:butt"
+         d="M 3,-3 0,0 3,3"
+         id="path5057"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker3931"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Arrow2"
+       markerWidth="7.6999998"
+       markerHeight="5.5999999"
+       viewBox="0 0 7.7 5.6"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path3929" />
+    </marker>
+    <style
+       id="style11460">
+      .title { font: 700 34px Arial, sans-serif; fill: #1f4aa8; }
+      .subtitle { font: 600 22px Arial, sans-serif; fill: #1f4aa8; }
+      .label { font: 600 24px Arial, sans-serif; fill: #111; }
+      .text { font: 20px Arial, sans-serif; fill: #222; }
+      .small { font: 18px Arial, sans-serif; fill: #333; }
+      .math { font: italic 24px Georgia, serif; fill: #111; }
+      .box { fill: #ffffff; stroke: #1f4aa8; stroke-width: 2.5; rx: 16; }
+      .pod { fill: #f7faf7; stroke: #406b43; stroke-width: 2.5; rx: 16; }
+      .inner { fill: #ffffff; stroke: #999; stroke-width: 1.5; rx: 12; }
+      .dag { fill: #eef5ee; stroke: #5f8a62; stroke-width: 1.5; rx: 12; }
+      .dashed { stroke-dasharray: 10 8; }
+    </style>
+    <marker
+       id="arrow"
+       markerWidth="12"
+       markerHeight="12"
+       refX="10"
+       refY="6"
+       orient="auto">
+      <path
+         d="M 0,0 12,6 0,12 Z"
+         fill="#111111"
+         id="path11462" />
+    </marker>
+    <marker
+       id="arrowBlue"
+       markerWidth="12"
+       markerHeight="12"
+       refX="10"
+       refY="6"
+       orient="auto">
+      <path
+         d="M 0,0 12,6 0,12 Z"
+         fill="#1f4aa8"
+         id="path11465" />
+    </marker>
+  </defs>
+  <!-- Coordination Layer -->
+  <!-- Sync Agents -->
+  <!-- Federation Messages -->
+  <!-- Dashed federation arrows -->
+  <!-- Privacy Boundary -->
+  <!-- Pod A -->
+  <!-- Pod B -->
+  <!-- Vertical raw data arrows -->
+  <!-- Upward artifact arrows -->
+  <!-- Caption -->
+  <rect
+     style="fill:#ffffff;fill-opacity:1;stroke:#1a1a1a;stroke-width:1.5;stroke-dasharray:none"
+     id="rect2956"
+     width="1414.2191"
+     height="895.7533"
+     x="0.75000042"
+     y="0.75" />
+  <rect
+     x="83.153946"
+     y="50.75"
+     width="1269.6725"
+     height="317.39276"
+     class="box"
+     fill="#f9fbff"
+     id="rect11470" />
+  <rect
+     style="fill:#ffffff;fill-opacity:1;stroke-width:1.16031"
+     id="rect14450"
+     width="613.91101"
+     height="79.981361"
+     x="411.0347"
+     y="26.689901" />
+  <text
+     x="717.99017"
+     y="63.75"
+     text-anchor="middle"
+     class="title"
+     id="text11472"
+     style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-size:34px;line-height:normal;font-family:Arial, sans-serif">FEDERATED COORDINATION LAYER</text>
+  <text
+     x="717.99017"
+     y="88.75"
+     text-anchor="middle"
+     class="subtitle"
+     id="text11474"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:22px;line-height:normal;font-family:Arial, sans-serif">Inter-Pod Coordination Space</text>
+  <rect
+     x="492.9902"
+     y="125.75"
+     width="450"
+     height="150"
+     class="box"
+     fill="#ffffff"
+     id="rect11492" />
+  <text
+     x="717.68549"
+     y="175.75"
+     text-anchor="middle"
+     class="label"
+     id="text11494"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:normal;font-family:Arial, sans-serif">Federation Messages</text>
+  <text
+     x="717.99017"
+     y="255.75"
+     text-anchor="middle"
+     class="small"
+     id="text11498"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18px;line-height:normal;font-family:Arial, sans-serif">event hashes · signatures · verifiables credentials</text>
+  <text
+     x="717.10541"
+     y="443.75"
+     text-anchor="middle"
+     class="label"
+     id="text11506"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:normal;font-family:Arial, sans-serif">PRIVACY BOUNDARY</text>
+  <text
+     x="717.29193"
+     y="478.75"
+     text-anchor="middle"
+     class="text"
+     id="text11508"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20px;line-height:normal;font-family:Arial, sans-serif"><tspan
+       sodipodi:role="line"
+       id="tspan4863"
+       x="717.29193"
+       y="478.75">Raw institutional data never</tspan><tspan
+       sodipodi:role="line"
+       id="tspan4865"
+       x="717.29193"
+       y="503.75">crosses the pod boundary</tspan></text>
+  <path
+     style="fill:none;fill-opacity:0.901961;stroke:#0044aa;stroke-width:6;stroke-dasharray:18, 18;stroke-dashoffset:0"
+     d="M 82.245399,409.76158 H 1349.357"
+     id="path4843" />
+  <path
+     style="fill:none;fill-opacity:0.901961;stroke:#0044aa;stroke-width:3;stroke-dasharray:9, 9;stroke-dashoffset:0;marker-end:url(#marker3931)"
+     d="M 493.41915,221.75 H 269.14659 v 23.7599"
+     id="path5765"
+     sodipodi:nodetypes="ccc" />
+  <g
+     id="g1512"
+     transform="translate(-88.009811,0.75)">
+    <rect
+       x="173.44812"
+       y="547.82166"
+       width="363.10376"
+       height="312.17831"
+       class="pod"
+       id="rect11510" />
+    <text
+       x="355"
+       y="590"
+       text-anchor="middle"
+       class="label"
+       fill="#2f5d33"
+       id="text11512"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:normal;font-family:Arial, sans-serif">POD A (Sovereign)</text>
+    <rect
+       x="205.61432"
+       y="630"
+       width="298.77136"
+       height="113.05731"
+       class="inner"
+       id="rect11514" />
+    <text
+       x="355"
+       y="670"
+       text-anchor="middle"
+       class="label"
+       id="text11516"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:0;font-family:Arial, sans-serif">Local Data (𝒟<tspan
+   style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65%;line-height:0;font-family:Arial, sans-serif;-inkscape-font-specification:'Arial, sans-serif Italic';baseline-shift:sub"
+   id="tspan5092">raw</tspan>)</text>
+    <text
+       x="355"
+       y="703"
+       text-anchor="middle"
+       class="small"
+       id="text11518"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18px;line-height:normal;font-family:Arial, sans-serif"><tspan
+         sodipodi:role="line"
+         id="tspan4680"
+         x="355"
+         y="703">deliberations · membership</tspan><tspan
+         sodipodi:role="line"
+         id="tspan4682"
+         x="355"
+         y="725.5">· votes · internal state</tspan></text>
+    <rect
+       x="206.50116"
+       y="765"
+       width="296.99768"
+       height="72.607224"
+       class="dag"
+       id="rect11520" />
+    <text
+       x="355"
+       y="808"
+       text-anchor="middle"
+       class="label"
+       id="text11522"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:normal;font-family:Arial, sans-serif">Blocklace DAG</text>
+  </g>
+  <path
+     style="fill:none;fill-opacity:0.901961;stroke:#0044aa;stroke-width:3;stroke-dasharray:9, 9;stroke-dashoffset:0;marker-end:url(#marker3931)"
+     d="M 202.75643,263.72725 V 161.45469 h 269.7599"
+     id="path2196"
+     sodipodi:nodetypes="ccc" />
+  <g
+     id="g2490"
+     transform="translate(778.64747,0.75)">
+    <rect
+       x="173.44812"
+       y="547.82166"
+       width="363.10376"
+       height="312.17831"
+       class="pod"
+       id="rect2470" />
+    <text
+       x="355"
+       y="590"
+       text-anchor="middle"
+       class="label"
+       fill="#2f5d33"
+       id="text2472"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:normal;font-family:Arial, sans-serif">POD B(Sovereign)</text>
+    <rect
+       x="205.61432"
+       y="630"
+       width="298.77136"
+       height="113.05731"
+       class="inner"
+       id="rect2474" />
+    <text
+       x="355"
+       y="670"
+       text-anchor="middle"
+       class="label"
+       id="text2478"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:0;font-family:Arial, sans-serif">Local Data (𝒟<tspan
+   style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65%;line-height:0;font-family:Arial, sans-serif;-inkscape-font-specification:'Arial, sans-serif Italic';baseline-shift:sub"
+   id="tspan2476">raw</tspan>)</text>
+    <text
+       x="355"
+       y="703"
+       text-anchor="middle"
+       class="small"
+       id="text2484"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18px;line-height:normal;font-family:Arial, sans-serif"><tspan
+         sodipodi:role="line"
+         id="tspan2480"
+         x="355"
+         y="703">deliberations · membership</tspan><tspan
+         sodipodi:role="line"
+         id="tspan2482"
+         x="355"
+         y="725.5">· votes · internal state</tspan></text>
+    <rect
+       x="206.50116"
+       y="765"
+       width="296.99768"
+       height="72.607224"
+       class="dag"
+       id="rect2486" />
+    <text
+       x="355"
+       y="808"
+       text-anchor="middle"
+       class="label"
+       id="text2488"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:normal;font-family:Arial, sans-serif">Blocklace DAG</text>
+  </g>
+  <path
+     style="fill:none;fill-opacity:0.901961;stroke:#0044aa;stroke-width:3;stroke-dasharray:9, 9;stroke-dashoffset:0;marker-end:url(#marker3931)"
+     d="m 941.91369,221.75 h 224.27251 v 23.7599"
+     id="path2508"
+     sodipodi:nodetypes="ccc" />
+  <rect
+     x="995.60419"
+     y="264.57483"
+     width="277.71219"
+     height="201.65562"
+     class="inner"
+     id="rect2510"
+     style="stroke-width:2.25258;stroke-dasharray:none" />
+  <g
+     id="g7187"
+     transform="translate(0,-20)">
+    <text
+       x="1132.2246"
+       y="339.75"
+       text-anchor="middle"
+       class="label"
+       id="text2512"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:normal;font-family:Arial, sans-serif">Sync</text>
+    <text
+       x="1132.4004"
+       y="372.75"
+       text-anchor="middle"
+       class="label"
+       id="text2514"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:normal;font-family:Arial, sans-serif">Agent B</text>
+  </g>
+  <path
+     style="fill:none;fill-opacity:0.901961;stroke:#0044aa;stroke-width:3;stroke-dasharray:9, 9;stroke-dashoffset:0;marker-end:url(#marker3931)"
+     d="M 1232.5764,263.72725 V 161.45469 H 962.81649"
+     id="path2542"
+     sodipodi:nodetypes="ccc" />
+  <g
+     id="g6902"
+     transform="translate(49.677082)">
+    <text
+       x="153.32744"
+       y="514.75"
+       text-anchor="middle"
+       class="label"
+       id="text5223"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:0;font-family:Arial, sans-serif">𝒟<tspan
+   style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65%;line-height:0;font-family:Arial, sans-serif;-inkscape-font-specification:'Arial, sans-serif Italic';baseline-shift:sub"
+   id="tspan5221">raw</tspan></text>
+    <g
+       id="g6868"
+       transform="translate(4.2563615)">
+      <path
+         style="fill:none;fill-opacity:0.901961;stroke:#000000;stroke-width:3;stroke-dasharray:none;marker-end:url(#marker3931)"
+         d="M 184.52301,547.06592 V 486.79336"
+         id="path4899"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;fill-opacity:0.901961;stroke:#0044aa;stroke-width:3;stroke-dasharray:9, 9;stroke-dashoffset:0;marker-end:url(#marker3931)"
+         d="m 241.48384,467.75 v 59.7599"
+         id="path3252"
+         sodipodi:nodetypes="cc" />
+    </g>
+    <text
+       x="280.2215"
+       y="513.15039"
+       text-anchor="middle"
+       class="math"
+       id="text6812"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;line-height:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif';fill:#111111"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'"
+         id="tspan6808">𝒟</tspan><tspan
+         id="tspan6810"
+         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65%;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif Italic';baseline-shift:sub">pub</tspan></text>
+  </g>
+  <g
+     id="g6968"
+     transform="translate(916.33436)">
+    <text
+       x="153.32744"
+       y="514.75"
+       text-anchor="middle"
+       class="label"
+       id="text6954"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:0;font-family:Arial, sans-serif">𝒟<tspan
+   style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65%;line-height:0;font-family:Arial, sans-serif;-inkscape-font-specification:'Arial, sans-serif Italic';baseline-shift:sub"
+   id="tspan6952">raw</tspan></text>
+    <g
+       id="g6960"
+       transform="translate(4.2563615)">
+      <path
+         style="fill:none;fill-opacity:0.901961;stroke:#000000;stroke-width:3;stroke-dasharray:none;marker-end:url(#marker3931)"
+         d="M 184.52301,547.06592 V 486.79336"
+         id="path6956"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;fill-opacity:0.901961;stroke:#0044aa;stroke-width:3;stroke-dasharray:9, 9;stroke-dashoffset:0;marker-end:url(#marker3931)"
+         d="m 241.48384,467.75 v 59.7599"
+         id="path6958"
+         sodipodi:nodetypes="cc" />
+    </g>
+    <text
+       x="280.2215"
+       y="513.15039"
+       text-anchor="middle"
+       class="math"
+       id="text6966"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;line-height:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif';fill:#111111"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'"
+         id="tspan6962">𝒟</tspan><tspan
+         id="tspan6964"
+         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65%;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif Italic';baseline-shift:sub">pub</tspan></text>
+  </g>
+  <g
+     id="g7159"
+     transform="translate(37.313752,-20)">
+    <text
+       x="1049.3228"
+       y="434.73038"
+       text-anchor="middle"
+       class="math"
+       id="text2520"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;line-height:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'">𝓕 <tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'"
+   id="tspan2516">: 𝒟</tspan><tspan
+   id="tspan2518"
+   style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65%;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif Italic';baseline-shift:sub">raw</tspan></text>
+    <path
+       style="fill:#0066cc;fill-opacity:0.901961;stroke:#1a1a1a;stroke-width:1.5;stroke-dasharray:none;marker-end:url(#Arrow1)"
+       d="m 1108.0628,428.85662 h 22.717"
+       id="path2538" />
+    <text
+       x="1167.2574"
+       y="433.00961"
+       text-anchor="middle"
+       class="math"
+       id="text7008"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;line-height:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif';fill:#111111"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'"
+         id="tspan7004">𝒟</tspan><tspan
+         id="tspan7006"
+         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65%;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif Italic';baseline-shift:sub">pub</tspan></text>
+  </g>
+  <text
+     x="660.20197"
+     y="215.15564"
+     class="math"
+     id="text4584"
+     style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;line-height:normal;font-family:Georgia, serif"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'"
+   id="tspan4576">= {</tspan> H<tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'"
+   id="tspan4578">(</tspan>e<tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'"
+   id="tspan4580">)</tspan>, σ, VC <tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'"
+   id="tspan4582">}</tspan></text>
+  <text
+     x="627.77899"
+     y="212.37698"
+     text-anchor="middle"
+     class="math"
+     id="text7265"
+     style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;line-height:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif';fill:#111111"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'"
+       id="tspan7261">𝒟</tspan><tspan
+       id="tspan7263"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65%;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif Italic';baseline-shift:sub">pub</tspan></text>
+  <rect
+     x="128.9469"
+     y="264.57483"
+     width="277.71219"
+     height="201.65562"
+     class="inner"
+     id="rect7349"
+     style="stroke-width:2.25258;stroke-dasharray:none" />
+  <g
+     id="g7355"
+     transform="translate(-866.65728,-20)">
+    <text
+       x="1132.2246"
+       y="339.75"
+       text-anchor="middle"
+       class="label"
+       id="text7351"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:normal;font-family:Arial, sans-serif">Sync</text>
+    <text
+       x="1132.4004"
+       y="372.75"
+       text-anchor="middle"
+       class="label"
+       id="text7353"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:24px;line-height:normal;font-family:Arial, sans-serif">Agent B</text>
+  </g>
+  <g
+     id="g7371"
+     transform="translate(-829.34353,-20)">
+    <text
+       x="1049.3228"
+       y="434.73038"
+       text-anchor="middle"
+       class="math"
+       id="text7361"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;line-height:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'">𝓕 <tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'"
+   id="tspan7357">: 𝒟</tspan><tspan
+   id="tspan7359"
+   style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65%;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif Italic';baseline-shift:sub">raw</tspan></text>
+    <path
+       style="fill:#0066cc;fill-opacity:0.901961;stroke:#1a1a1a;stroke-width:1.5;stroke-dasharray:none;marker-end:url(#Arrow1)"
+       d="m 1108.0628,428.85662 h 22.717"
+       id="path7363" />
+    <text
+       x="1167.2574"
+       y="433.00961"
+       text-anchor="middle"
+       class="math"
+       id="text7369"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;line-height:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif';fill:#111111"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'"
+         id="tspan7365">𝒟</tspan><tspan
+         id="tspan7367"
+         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65%;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif Italic';baseline-shift:sub">pub</tspan></text>
+  </g>
+  <text
+     x="347.77899"
+     y="194.37698"
+     text-anchor="middle"
+     class="math"
+     id="text7781"
+     style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;line-height:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif';fill:#111111"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'"
+       id="tspan7777">𝒟</tspan><tspan
+       id="tspan7779"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65%;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif Italic';baseline-shift:sub">pub</tspan></text>
+  <text
+     x="1067.7791"
+     y="194.37698"
+     text-anchor="middle"
+     class="math"
+     id="text7811"
+     style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;line-height:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif';fill:#111111"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif'"
+       id="tspan7807">𝒟</tspan><tspan
+       id="tspan7809"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65%;font-family:Georgia, serif;-inkscape-font-specification:'Georgia, serif Italic';baseline-shift:sub">pub</tspan></text>
+</svg>

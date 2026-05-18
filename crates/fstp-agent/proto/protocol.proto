@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package fstp;
+
+// Especificación para Java / Spring Boot
+option java_multiple_files = true;
+option java_package = "com.agora.fstp.grpc";
+
+// El servicio que expondrá Rust
+service FstpService {
+  rpc VerifyCredential (CredentialRequest) returns (VerificationResponse);
+}
+
+message CredentialRequest {
+  // Decentralized Identifier of the emitting entity.
+  string did = 1;
+
+  // JSON-serialized credential payload. Only its SHA-256 hash enters the
+  // Blocklace (D_pub); the content stays on the JVM side (D_raw).
+  string credential_json = 2;
+
+  // Hex-encoded Ed25519 signature over credential_json bytes.
+  string signature_hex = 3;
+
+  // Hex-encoded Ed25519 public key (32 bytes) of the signer.
+  // Required for cryptographic verification in grpc.rs (§3.1).
+  // Dev fallback when issuer DID is not in IssuerRegistry; ignored when registered.
+  string pubkey_hex = 4;
+}
+
+message VerificationResponse {
+  bool is_valid = 1;
+  string error_message = 2;
+}
+

@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+title: "Federated Sovereign Transport Protocol (FSTP)"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: "Soto"
+    given-names: "Ramón"
+    # Update affiliation and ORCID before public release
+license: Apache-2.0
+repository-code: "https://github.com/rsotoc/fstp"
+url: "https://github.com/rsotoc/fstp"
+version: 0.1.0
+date-released: 2026-05-18
+keywords:
+  - federation
+  - privacy
+  - self-sovereign identity
+  - verifiable credentials
+  - synchronization
+preferred-citation:
+  type: article
+  title: "Federated Sovereign Transport Protocol: Verifiable Coordination Without Disclosure"
+  authors:
+    - family-names: "Soto"
+      given-names: "Ramón"
+  year: 2026
+  notes: "Technical whitepaper source in docs/FSTP-techPaper.tex; update with venue and DOI when published."

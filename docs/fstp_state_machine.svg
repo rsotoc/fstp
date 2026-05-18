@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="680"
+   viewBox="0 0 680 420.66528"
+   role="img"
+   font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+   version="1.1"
+   id="svg8383"
+   sodipodi:docname="fstp_state_machine.svg"
+   height="420.66528"
+   inkscape:version="1.2.1 (9c6d41e4, 2022-07-14)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <sodipodi:namedview
+     id="namedview8385"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="0.85785361"
+     inkscape:cx="332.80736"
+     inkscape:cy="213.90596"
+     inkscape:window-width="1429"
+     inkscape:window-height="691"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg8383" />
+  <title
+     id="title8267">FSTP Synchronization Agent — Formal State Machine</title>
+  <desc
+     id="desc8269">State machine diagram showing the five states of the FSTP synchronization agent: idle, validating, composing, transmitting, and logging, with transitions and error conditions.</desc>
+  <defs
+     id="defs8277">
+    <marker
+       id="arrow"
+       viewBox="0 0 10 10"
+       refX="8"
+       refY="5"
+       markerWidth="6"
+       markerHeight="6"
+       orient="auto-start-reverse">
+      <path
+         d="M 2,1 8,5 2,9"
+         fill="none"
+         stroke="#5f5e5a"
+         stroke-width="1.5"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+         id="path8271" />
+    </marker>
+    <marker
+       id="arrow-err"
+       viewBox="0 0 10 10"
+       refX="8"
+       refY="5"
+       markerWidth="6"
+       markerHeight="6"
+       orient="auto-start-reverse">
+      <path
+         d="M 2,1 8,5 2,9"
+         fill="none"
+         stroke="#a32d2d"
+         stroke-width="1.5"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+         id="path8274" />
+    </marker>
+  </defs>
+  <!-- Background -->
+  <rect
+     width="680"
+     height="420.66528"
+     fill="#ffffff"
+     id="rect8279"
+     x="0"
+     y="0"
+     style="stroke-width:0.823707" />
+  <!-- ── IDLE (top center) ── -->
+  <rect
+     x="275"
+     y="24"
+     width="150"
+     height="52"
+     rx="8"
+     fill="#f1efe8"
+     stroke="#888780"
+     stroke-width="0.5"
+     id="rect8281" />
+  <g
+     id="g11223"
+     transform="translate(10,-11.884675)">
+    <text
+       x="340"
+       y="53"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#2c2c2a"
+       id="text8283">Idle</text>
+    <text
+       x="340"
+       y="70"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#5f5e5a"
+       id="text8285">Awaiting trigger</text>
+  </g>
+  <!-- ── VALIDATING (left) ── -->
+  <rect
+     x="62"
+     y="154"
+     width="160"
+     height="52"
+     rx="8"
+     fill="#e6f1fb"
+     stroke="#185fa5"
+     stroke-width="0.5"
+     id="rect8287" />
+  <g
+     id="g11175"
+     transform="translate(10,-10.726675)">
+    <text
+       x="132"
+       y="183"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#0c447c"
+       id="text8289">Validating</text>
+    <text
+       x="132"
+       y="200"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#185fa5"
+       id="text8291">Check confinement</text>
+  </g>
+  <!-- ── COMPOSING (center) ── -->
+  <rect
+     x="275"
+     y="154"
+     width="150"
+     height="52"
+     rx="8"
+     fill="#e1f5ee"
+     stroke="#0f6e56"
+     stroke-width="0.5"
+     id="rect8293" />
+  <g
+     id="g11191"
+     transform="translate(10,-11.279682)">
+    <text
+       x="340"
+       y="183.119"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#085041"
+       id="text8295">Composing</text>
+    <text
+       x="340"
+       y="199.05301"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#0f6e56"
+       id="text8297">Build 𝒞pub artifact</text>
+  </g>
+  <!-- ── TRANSMITTING (right) ── -->
+  <rect
+     x="480"
+     y="154"
+     width="160"
+     height="52"
+     rx="8"
+     fill="#eeedfe"
+     stroke="#534ab7"
+     stroke-width="0.5"
+     id="rect8299" />
+  <g
+     id="g11207"
+     transform="translate(10,-10.726675)">
+    <text
+       x="550"
+       y="183"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#3c3489"
+       id="text8301">Transmitting</text>
+    <text
+       x="550"
+       y="200"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#534ab7"
+       id="text8303">Send to federation</text>
+  </g>
+  <!-- ── LOGGING (bottom center) ── -->
+  <rect
+     x="275"
+     y="264"
+     width="150"
+     height="52"
+     rx="8"
+     fill="#f1efe8"
+     stroke="#888780"
+     stroke-width="0.5"
+     id="rect8305" />
+  <g
+     id="g11239"
+     transform="translate(10,-130.69668)">
+    <text
+       x="340"
+       y="413"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#2c2c2a"
+       id="text8307">Logging</text>
+    <text
+       x="340"
+       y="430"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#5f5e5a"
+       id="text8309">Write audit record</text>
+  </g>
+  <!-- ── ERROR (bottom left) ── -->
+  <rect
+     x="62"
+     y="264"
+     width="150"
+     height="52"
+     rx="8"
+     fill="#fcebeb"
+     stroke="#a32d2d"
+     stroke-width="0.5"
+     id="rect8311" />
+  <g
+     id="g11255"
+     transform="translate(10,-6.7266753)">
+    <text
+       x="127"
+       y="289"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="14px"
+       font-weight="500"
+       fill="#791f1f"
+       id="text8313">Error</text>
+    <text
+       x="127"
+       y="306"
+       text-anchor="middle"
+       dominant-baseline="central"
+       font-size="12px"
+       fill="#a32d2d"
+       id="text8315">Confinement violated</text>
+  </g>
+  <!-- ══ TRANSITIONS ══ -->
+  <!-- Idle → Validating -->
+  <path
+     d="m 334.92891,76 0.48721,43.72028 -50.55217,-0.15188 m -93.23147,-0.26367 -47.09915,-0.13612 0.49037,35.50911"
+     fill="none"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arrow)"
+     id="path8317"
+     style="stroke-width:1.5;stroke-dasharray:none"
+     sodipodi:nodetypes="cccccc" />
+  <text
+     x="238.29384"
+     y="118.70617"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text8321">trigger received</text>
+  <!-- Validating → Error -->
+  <path
+     d="M 137.85308,208 137,264"
+     fill="none"
+     stroke="#a32d2d"
+     stroke-width="1"
+     stroke-dasharray="5, 3"
+     marker-end="url(#arrow-err)"
+     id="path8323"
+     sodipodi:nodetypes="cc"
+     style="stroke-width:1.5;stroke-dasharray:7.5, 4.5;stroke-dashoffset:0" />
+  <text
+     x="183.96683"
+     y="233.02368"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#a32d2d"
+     id="text8327">m ∩ 𝒟raw ≠ ∅</text>
+  <!-- Validating → Composing -->
+  <path
+     d="m 221.70616,180 h 53"
+     fill="none"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arrow)"
+     id="path8329"
+     style="stroke-width:1.5;stroke-dasharray:none"
+     sodipodi:nodetypes="cc" />
+  <text
+     x="248.68246"
+     y="168.36493"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text8333">auth ok</text>
+  <!-- Composing → Transmitting -->
+  <text
+     x="451.97629"
+     y="167.18893"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text8339">typed ok</text>
+  <!-- Transmitting → Logging -->
+  <path
+     d="m 553.31754,206.18957 -0.10676,27.56074 -92.7243,-0.81497 m -33.13194,-0.39618 -73.7228,-0.62206 -0.57487,33.13977"
+     fill="none"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arrow)"
+     id="path8341"
+     sodipodi:nodetypes="cccccc"
+     style="stroke-width:1.5;stroke-dasharray:none" />
+  <text
+     x="444.43127"
+     y="231.74408"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text8345">sent</text>
+  <!-- Transmitting → Error (net failure) -->
+  <path
+     d="m 590.63981,207.84834 c -4.25488,20.76955 -12.31559,35.46293 -23.24575,45.88082 m -28.39175,16.76148 c -31.13384,10.8518 -72.12638,8.36199 -113.97861,9.83637"
+     fill="none"
+     stroke="#a32d2d"
+     stroke-width="1"
+     stroke-dasharray="5, 3"
+     marker-end="url(#arrow-err)"
+     id="path8347"
+     sodipodi:nodetypes="cccc"
+     style="stroke-width:1.5;stroke-dasharray:7.5, 4.5;stroke-dashoffset:0" />
+  <rect
+     x="558"
+     y="282"
+     width="84"
+     height="20"
+     rx="4"
+     fill="#ffffff"
+     id="rect8349" />
+  <text
+     x="552.7251"
+     y="261.65402"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#a32d2d"
+     id="text8351">net failure</text>
+  <!-- Logging → Idle (reset) -->
+  <path
+     d="m 425.47394,299.6872 26.92207,0.1802 m 39.81434,0.28787 165.36785,1.18122 -0.11374,-235.502372 -231.93694,-1.109332"
+     fill="none"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arrow)"
+     id="path8353"
+     sodipodi:nodetypes="cccccc"
+     style="stroke-width:1.5;stroke-dasharray:none" />
+  <text
+     x="472.03317"
+     y="300.97156"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text8357">reset</text>
+  <!-- Error → Idle (log + reset) -->
+  <path
+     d="M 62.890992,293.34597 C 45.051203,287.99837 29.780363,268.83651 23.125049,243.46506 M 19.574675,217.08492 C 18.552277,149.43872 76.702001,60.847016 274.04266,51.947866"
+     fill="none"
+     stroke="#a32d2d"
+     stroke-width="1"
+     stroke-dasharray="5, 3"
+     marker-end="url(#arrow-err)"
+     id="path8359"
+     sodipodi:nodetypes="cccc"
+     style="stroke-width:1.5;stroke-dasharray:7.5, 4.5;stroke-dashoffset:0" />
+  <text
+     x="41.454971"
+     y="228.76776"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#a32d2d"
+     id="text8363">log + reset</text>
+  <!-- Idle self-loop -->
+  <path
+     d="m 410,24 c 37.87531,-16.3724 48.75869,12.100526 15.79128,25.032137"
+     fill="none"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arrow)"
+     id="path8365"
+     sodipodi:nodetypes="cc"
+     style="stroke-width:1.5;stroke-dasharray:none" />
+  <text
+     x="447.85205"
+     y="28.565384"
+     text-anchor="start"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text8367">waiting</text>
+  <!-- ══ INVARIANT BOX ══ -->
+  <rect
+     x="70"
+     y="344"
+     width="560"
+     height="60"
+     rx="8"
+     fill="#f1efe8"
+     stroke="#888780"
+     stroke-width="0.5"
+     id="rect8369" />
+  <text
+     x="350"
+     y="366"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="14px"
+     font-weight="500"
+     fill="#2c2c2a"
+     id="text8371">Invariant 3.1 (Synchronization confinement)</text>
+  <text
+     x="350"
+     y="387"
+     text-anchor="middle"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text8373">For every message m emitted: m ∩ 𝒟raw = ∅ — enforced at compile time, not at runtime</text>
+  <!-- ══ LEGEND ══ -->
+  <line
+     x1="21.184826"
+     y1="23.128288"
+     x2="61.184826"
+     y2="23.128288"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arrow)"
+     id="line8375"
+     style="stroke-width:1.5;stroke-dasharray:none" />
+  <text
+     x="69.18483"
+     y="23.540279"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#5f5e5a"
+     id="text8377">Normal transition</text>
+  <line
+     x1="21.184826"
+     y1="44.000107"
+     x2="61.184826"
+     y2="44.000107"
+     stroke="#a32d2d"
+     stroke-width="1"
+     stroke-dasharray="5, 3"
+     marker-end="url(#arrow-err)"
+     id="line8379"
+     style="stroke-width:1.5;stroke-dasharray:7.5, 4.5;stroke-dashoffset:0" />
+  <text
+     x="69.18483"
+     y="43.398098"
+     dominant-baseline="central"
+     font-size="12px"
+     fill="#a32d2d"
+     id="text8381">Error / violation path</text>
+  <path
+     d="m 425.25,180 h 53"
+     fill="none"
+     stroke="#5f5e5a"
+     stroke-width="1"
+     marker-end="url(#arrow)"
+     id="path10883"
+     style="stroke-width:1.5;stroke-dasharray:none"
+     sodipodi:nodetypes="cc" />
+  <metadata
+     id="metadata14401">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>FSTP Synchronization Agent — Formal State Machine</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>

@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 706.08276 443.26221"
+   font-family="system-ui, '-apple-system', sans-serif"
+   font-size="12px"
+   version="1.1"
+   id="svg22778"
+   sodipodi:docname="fstp_benchmark.svg"
+   width="706.08276"
+   height="443.26221"
+   inkscape:version="1.2.1 (9c6d41e4, 2022-07-14)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs22782" />
+  <sodipodi:namedview
+     id="namedview22780"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="1.2559296"
+     inkscape:cx="218.16509"
+     inkscape:cy="275.09503"
+     inkscape:window-width="1254"
+     inkscape:window-height="717"
+     inkscape:window-x="172"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg22778" />
+  <title
+     id="title22684">FSTP Blocklace — Synchronization benchmark results</title>
+  <desc
+     id="desc22686">Three series: sync_delta emission scales linearly with Δ; sync_delta is flat across N (N-independence); merge_blocks reception also scales linearly with Δ.</desc>
+  <rect
+     style="fill:#ffffff;stroke:none;stroke-width:1.5"
+     id="rect24768"
+     width="704.58276"
+     height="441.76221"
+     x="0.75"
+     y="0.75" />
+  <!-- ── Chart area ── -->
+  <!-- origin: (72, 20)  width: 560  height: 300 -->
+  <!-- Grid lines (horizontal) -->
+  <line
+     x1="83.933853"
+     y1="29.13789"
+     x2="643.93384"
+     y2="29.13789"
+     stroke="#e0dfd8"
+     stroke-width="0.5"
+     id="line22688" />
+  <line
+     x1="83.933853"
+     y1="104.13789"
+     x2="643.93384"
+     y2="104.13789"
+     stroke="#e0dfd8"
+     stroke-width="0.5"
+     id="line22690" />
+  <line
+     x1="83.933853"
+     y1="179.13789"
+     x2="643.93384"
+     y2="179.13789"
+     stroke="#e0dfd8"
+     stroke-width="0.5"
+     id="line22692" />
+  <line
+     x1="83.933853"
+     y1="254.13789"
+     x2="643.93384"
+     y2="254.13789"
+     stroke="#e0dfd8"
+     stroke-width="0.5"
+     id="line22694" />
+  <line
+     x1="83.933853"
+     y1="329.13788"
+     x2="643.93384"
+     y2="329.13788"
+     stroke="#e0dfd8"
+     stroke-width="0.5"
+     id="line22696" />
+  <!-- Axes -->
+  <line
+     x1="83.933853"
+     y1="29.13789"
+     x2="83.933853"
+     y2="329.13788"
+     stroke="#b4b2a9"
+     stroke-width="1"
+     id="line22698" />
+  <line
+     x1="83.933853"
+     y1="329.13788"
+     x2="643.93384"
+     y2="329.13788"
+     stroke="#b4b2a9"
+     stroke-width="1"
+     id="line22700" />
+  <!-- Y-axis labels  (max ≈ 530 µs → scale: 300px / 560µs ≈ 0.536 px/µs) -->
+  <!-- 0=320, 100→267, 200→214, 300→161, 400→108, 530→20 -->
+  <text
+     x="77.933853"
+     y="333.13788"
+     text-anchor="end"
+     fill="#888780"
+     id="text22702">0</text>
+  <text
+     x="77.933853"
+     y="258.13788"
+     text-anchor="end"
+     fill="#888780"
+     id="text22704">100</text>
+  <text
+     x="77.933853"
+     y="183.13789"
+     text-anchor="end"
+     fill="#888780"
+     id="text22706">200</text>
+  <text
+     x="77.933853"
+     y="108.13789"
+     text-anchor="end"
+     fill="#888780"
+     id="text22708">300</text>
+  <text
+     x="77.933853"
+     y="33.13789"
+     text-anchor="end"
+     fill="#888780"
+     id="text22710">500</text>
+  <!-- Y axis title -->
+  <text
+     transform="rotate(-90)"
+     x="-179.13789"
+     y="25.933853"
+     text-anchor="middle"
+     fill="#888780"
+     font-size="11px"
+     id="text22712">Median time (µs)</text>
+  <!-- X-axis: Δ values at 10, 50, 100, 200, 500 -->
+  <!-- x positions: 72 + (i/4)*560   for i=0..4 -->
+  <!-- i=0→72, i=1→212, i=2→352, i=3→492, i=4→632 -->
+  <text
+     x="83.933853"
+     y="345.13788"
+     text-anchor="middle"
+     fill="#888780"
+     id="text22714">10</text>
+  <text
+     x="223.93385"
+     y="345.13788"
+     text-anchor="middle"
+     fill="#888780"
+     id="text22716">50</text>
+  <text
+     x="363.93384"
+     y="345.13788"
+     text-anchor="middle"
+     fill="#888780"
+     id="text22718">100</text>
+  <text
+     x="503.93384"
+     y="345.13788"
+     text-anchor="middle"
+     fill="#888780"
+     id="text22720">200</text>
+  <text
+     x="643.93384"
+     y="345.13788"
+     text-anchor="middle"
+     fill="#888780"
+     id="text22722">500</text>
+  <text
+     x="363.93384"
+     y="364.13788"
+     text-anchor="middle"
+     fill="#888780"
+     font-size="11px"
+     id="text22724">Δ (blocks in symmetric difference)</text>
+  <!-- ── Helper: y = 320 - (µs * 300/530) ≈ 320 - µs*0.566 ── -->
+  <!-- ══ Series 1: sync_delta emission  (teal #1D9E75) ══ -->
+  <!-- points: (10,5.8)→(72,317) (50,21.2)→(212,308) (100,40.6)→(352,297) (200,79.0)→(492,275) (500,221.3)→(632,195) -->
+  <polyline
+     points="72,317 212,308 352,297 492,275 632,195"
+     fill="none"
+     stroke="#1d9e75"
+     stroke-width="2.5"
+     stroke-linejoin="round"
+     id="polyline22726"
+     transform="translate(11.933853,9.1378899)" />
+  <circle
+     cx="83.933853"
+     cy="326.13788"
+     r="5"
+     fill="#1d9e75"
+     id="circle22728" />
+  <circle
+     cx="223.93385"
+     cy="317.13788"
+     r="5"
+     fill="#1d9e75"
+     id="circle22730" />
+  <circle
+     cx="363.93384"
+     cy="306.13788"
+     r="5"
+     fill="#1d9e75"
+     id="circle22732" />
+  <circle
+     cx="503.93384"
+     cy="284.13788"
+     r="5"
+     fill="#1d9e75"
+     id="circle22734" />
+  <circle
+     cx="643.93384"
+     cy="204.13789"
+     r="5"
+     fill="#1d9e75"
+     id="circle22736" />
+  <!-- ══ Series 2: sync_delta N-independence (purple #7F77DD, dashed, ×10 scale) ══ -->
+  <!-- N=100→x=212 (mapped to Δ=50 slot), N=500→x=352, N=1000→x=492, N=5000→x=632 -->
+  <!-- times ×10: 205,206,219,212 → y: 320-205*0.566=204, 320-206*0.566=203, 320-219*0.566=196, 320-212*0.566=200 -->
+  <polyline
+     points="212,204 352,203 492,196 632,200"
+     fill="none"
+     stroke="#7f77dd"
+     stroke-width="2"
+     stroke-dasharray="6, 3"
+     stroke-linejoin="round"
+     id="polyline22738"
+     transform="translate(11.933853,9.1378899)" />
+  <!-- diamond markers -->
+  <polygon
+     points="212,210 206,204 212,198 218,204 "
+     fill="#7f77dd"
+     id="polygon22740"
+     transform="translate(11.933853,9.1378899)" />
+  <polygon
+     points="352,209 346,203 352,197 358,203 "
+     fill="#7f77dd"
+     id="polygon22742"
+     transform="translate(11.933853,9.1378899)" />
+  <polygon
+     points="492,202 486,196 492,190 498,196 "
+     fill="#7f77dd"
+     id="polygon22744"
+     transform="translate(11.933853,9.1378899)" />
+  <polygon
+     points="632,206 626,200 632,194 638,200 "
+     fill="#7f77dd"
+     id="polygon22746"
+     transform="translate(11.933853,9.1378899)" />
+  <!-- ══ Series 3: merge_blocks reception (coral #D85A30, dotted) ══ -->
+  <!-- (10,77.3)→(72,276) (50,168.8)→(212,225) (100,284.3)→(352,159) (200,526.2)→(492,22) -->
+  <polyline
+     points="72,276 212,225 352,159 492,22"
+     fill="none"
+     stroke="#d85a30"
+     stroke-width="2"
+     stroke-dasharray="3, 3"
+     stroke-linejoin="round"
+     id="polyline22748"
+     transform="translate(11.933853,9.1378899)" />
+  <rect
+     x="79.933853"
+     y="281.13788"
+     width="8"
+     height="8"
+     fill="#d85a30"
+     id="rect22750" />
+  <rect
+     x="219.93385"
+     y="230.13789"
+     width="8"
+     height="8"
+     fill="#d85a30"
+     id="rect22752" />
+  <rect
+     x="359.93384"
+     y="164.13789"
+     width="8"
+     height="8"
+     fill="#d85a30"
+     id="rect22754" />
+  <rect
+     x="499.93384"
+     y="27.13789"
+     width="8"
+     height="8"
+     fill="#d85a30"
+     id="rect22756" />
+  <!-- ══ Legend ══ -->
+  <g
+     transform="translate(91.933853,379.13789)"
+     id="g22776">
+    <!-- Series 1 -->
+    <line
+       x1="0"
+       y1="6"
+       x2="20"
+       y2="6"
+       stroke="#1d9e75"
+       stroke-width="2.5"
+       id="line22758" />
+    <circle
+       cx="10"
+       cy="6"
+       r="4"
+       fill="#1d9e75"
+       id="circle22760" />
+    <text
+       x="26"
+       y="10"
+       fill="#5f5e5a"
+       id="text22762">sync_delta — emission (N = 1000 fixed)</text>
+    <!-- Series 2 -->
+    <line
+       x1="0"
+       y1="26"
+       x2="20"
+       y2="26"
+       stroke="#7f77dd"
+       stroke-width="2"
+       stroke-dasharray="6, 3"
+       id="line22764" />
+    <polygon
+       points="10,32 4,26 10,20 16,26 "
+       fill="#7f77dd"
+       id="polygon22766" />
+    <text
+       x="26"
+       y="30"
+       fill="#5f5e5a"
+       id="text22768">sync_delta — N independence (Δ = 50, time ×10)</text>
+    <!-- Series 3 -->
+    <line
+       x1="0"
+       y1="46"
+       x2="20"
+       y2="46"
+       stroke="#d85a30"
+       stroke-width="2"
+       stroke-dasharray="3, 3"
+       id="line22770" />
+    <rect
+       x="6"
+       y="42"
+       width="8"
+       height="8"
+       fill="#d85a30"
+       id="rect22772" />
+    <text
+       x="26"
+       y="50"
+       fill="#5f5e5a"
+       id="text22774">merge_blocks — reception (N = 1000 fixed)</text>
+  </g>
+  <metadata
+     id="metadata24770">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>FSTP Blocklace — Synchronization benchmark results</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>
