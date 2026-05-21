@@ -199,6 +199,14 @@ pub fn build_router(state: SharedState) -> Router {
             "/fstp/admin/sync",
             post(integration::admin_sync_handler),
         )
+        .route(
+            "/fstp/admin/blocklace/status",
+            get(super::blocklace_admin::blocklace_status_handler),
+        )
+        .route(
+            "/fstp/admin/blocklace/append",
+            post(super::blocklace_admin::blocklace_append_handler),
+        )
         .layer(TraceLayer::new_for_http())
         .layer(TimeoutLayer::new(Duration::from_secs(30)))
         .with_state(state)
