@@ -6,7 +6,7 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
-use fstp_core::blocklace::{AggregateAttrs, BlocklaceStore, BlockPayload};
+use fstp_core::blocklace::{AggregateAttrs, BlockPayload, BlocklaceStore};
 use fstp_core::message::EventClass;
 use fstp_core::types::{Ed25519Sig, Sha256Hash};
 use serde::Deserialize;

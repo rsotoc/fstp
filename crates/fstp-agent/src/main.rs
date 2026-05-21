@@ -1,24 +1,24 @@
 //! FSTP Sync Agent binary entry point (whitepaper §3.1 SA, §5 deployment).
 //! Launches concurrent mTLS Axum federation server and local gRPC gateway.
 
-mod production;
-mod persistence;
+mod agora_notify;
 mod client;
 mod outbound;
+mod persistence;
 mod platform_util;
-mod agora_notify;
+mod production;
 mod residence;
-mod sync_scheduler;
 mod server;
+mod sync_scheduler;
 
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
+use crate::server::{ServerState, TlsParams};
+use fstp_core::crypto::NodeSigner;
 use fstp_core::identity::{FederationContext, GlobalInstanceId};
 use fstp_core::types::{Did, FederationEndpoint};
-use fstp_core::crypto::NodeSigner;
-use crate::server::{ServerState, TlsParams};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -43,8 +43,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ikm: Vec<u8> = std::env::var("FSTP_NODE_IKM")
         .map(|s| s.into_bytes())
         .unwrap_or_else(|_| {
-            tracing::warn!("FSTP_NODE_IKM not set — using ephemeral random IKM. \
-                CIIs will change on restart. Set FSTP_NODE_IKM for stable identities.");
+            tracing::warn!(
+                "FSTP_NODE_IKM not set — using ephemeral random IKM. \
+                CIIs will change on restart. Set FSTP_NODE_IKM for stable identities."
+            );
             use std::collections::hash_map::DefaultHasher;
             use std::hash::{Hash, Hasher};
             let mut h = DefaultHasher::new();
@@ -52,8 +54,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             h.finish().to_le_bytes().repeat(4) // 32 bytes
         });
 
-    let node_did_str = std::env::var("FSTP_NODE_DID")
-        .unwrap_or_else(|_| "did:key:local-dev-node".to_string());
+    let node_did_str =
+        std::env::var("FSTP_NODE_DID").unwrap_or_else(|_| "did:key:local-dev-node".to_string());
 
     // Extraer el seed del signer ANTES de mover ikm a GlobalInstanceId.
     let signer_seed: [u8; 32] = {
@@ -67,12 +69,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // El CII base del nodo se deriva usando un link_id fijo (identidad raíz del nodo)
     // y la URL de su propio endpoint como contexto.
-    let own_endpoint_url = std::env::var("FSTP_OWN_URL")
-        .unwrap_or_else(|_| "https://localhost:8080".to_string());
+    let own_endpoint_url =
+        std::env::var("FSTP_OWN_URL").unwrap_or_else(|_| "https://localhost:8080".to_string());
 
     let root_link_id = Uuid::parse_str(
         &std::env::var("FSTP_ROOT_LINK_ID")
-            .unwrap_or_else(|_| "00000000-0000-0000-0000-000000000000".to_string())
+            .unwrap_or_else(|_| "00000000-0000-0000-0000-000000000000".to_string()),
     )?;
 
     let root_context = FederationContext::new(
@@ -119,10 +121,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if let Ok(bytes) = hex::decode(entry.pubkey_hex.trim()) {
                     if let Ok(arr) = <[u8; 32]>::try_from(bytes.as_slice()) {
                         if let Ok(vk) = ed25519_dalek::VerifyingKey::from_bytes(&arr) {
-                            server_state.issuer_registry.register(
-                                Did::new(&entry.did),
-                                fstp_core::types::PublicKey(vk),
-                            );
+                            server_state
+                                .issuer_registry
+                                .register(Did::new(&entry.did), fstp_core::types::PublicKey(vk));
                         }
                     }
                 }
@@ -141,15 +142,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 4. Configurar TLS
     let tls_params = TlsParams {
         cert_pem_path: std::env::var("FSTP_CERT_PATH")
-            .unwrap_or_else(|_| "certs/server.crt".into()).into(),
+            .unwrap_or_else(|_| "certs/server.crt".into())
+            .into(),
         key_pem_path: std::env::var("FSTP_KEY_PATH")
-            .unwrap_or_else(|_| "certs/server.key".into()).into(),
+            .unwrap_or_else(|_| "certs/server.key".into())
+            .into(),
     };
 
-    let http_addr = std::env::var("FSTP_HTTP_ADDR")
-        .unwrap_or_else(|_| "0.0.0.0:8080".to_string());
-    let grpc_addr = std::env::var("FSTP_GRPC_ADDR")
-        .unwrap_or_else(|_| "127.0.0.1:50051".to_string());
+    let http_addr = std::env::var("FSTP_HTTP_ADDR").unwrap_or_else(|_| "0.0.0.0:8080".to_string());
+    let grpc_addr =
+        std::env::var("FSTP_GRPC_ADDR").unwrap_or_else(|_| "127.0.0.1:50051".to_string());
 
     let http_state = shared_state.clone();
     let grpc_state = shared_state.clone();

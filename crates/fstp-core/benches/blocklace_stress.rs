@@ -26,7 +26,8 @@ fn mock_payload(seed: u64) -> BlockPayload {
 fn build_blocklace(n: u64, seed_offset: u64) -> InMemoryBlocklace {
     let mut bl = InMemoryBlocklace::new();
     for i in 0..n {
-        bl.append(mock_payload(seed_offset + i), mock_signature()).unwrap();
+        bl.append(mock_payload(seed_offset + i), mock_signature())
+            .unwrap();
     }
     bl
 }
@@ -54,7 +55,8 @@ fn build_pair(shared: u64, delta: u64) -> (InMemoryBlocklace, InMemoryBlocklace)
     // Fase 2: A diverge con `delta` bloques usando seeds distintos
     // para garantizar hashes únicos respecto a la base compartida
     for i in 0..delta {
-        bl_a.append(mock_payload(1_000_000 + i), mock_signature()).unwrap();
+        bl_a.append(mock_payload(1_000_000 + i), mock_signature())
+            .unwrap();
     }
 
     (bl_a, bl_b)
@@ -73,22 +75,18 @@ fn bench_sync_delta_vs_delta(c: &mut Criterion) {
 
     for &delta in deltas {
         group.throughput(Throughput::Elements(delta));
-        group.bench_with_input(
-            BenchmarkId::from_parameter(delta),
-            &delta,
-            |b, &delta| {
-                // El par se construye fuera del loop — medimos solo sync_delta
-                let (bl_a, bl_b) = build_pair(shared_n, delta);
-                let remote_frontier = bl_b.frontier();
+        group.bench_with_input(BenchmarkId::from_parameter(delta), &delta, |b, &delta| {
+            // El par se construye fuera del loop — medimos solo sync_delta
+            let (bl_a, bl_b) = build_pair(shared_n, delta);
+            let remote_frontier = bl_b.frontier();
 
-                b.iter(|| {
-                    // sync_delta es &self → no muta el estado, es seguro reusar
-                    let result = bl_a.sync_delta(&remote_frontier);
-                    // Prevent dead-code elimination
-                    std::hint::black_box(result);
-                });
-            },
-        );
+            b.iter(|| {
+                // sync_delta es &self → no muta el estado, es seguro reusar
+                let result = bl_a.sync_delta(&remote_frontier);
+                // Prevent dead-code elimination
+                std::hint::black_box(result);
+            });
+        });
     }
     group.finish();
 }
@@ -138,26 +136,22 @@ fn bench_merge_blocks_cost(c: &mut Criterion) {
 
     for &delta in deltas {
         group.throughput(Throughput::Elements(delta));
-        group.bench_with_input(
-            BenchmarkId::from_parameter(delta),
-            &delta,
-            |b, &delta| {
-                let (bl_a, bl_b) = build_pair(shared_n, delta);
-                let remote_frontier = bl_b.frontier();
-                let blocks_to_merge = bl_a.sync_delta(&remote_frontier);
+        group.bench_with_input(BenchmarkId::from_parameter(delta), &delta, |b, &delta| {
+            let (bl_a, bl_b) = build_pair(shared_n, delta);
+            let remote_frontier = bl_b.frontier();
+            let blocks_to_merge = bl_a.sync_delta(&remote_frontier);
 
-                // Pre-construir el pool de receptores fuera del loop de Criterion
-                // iter_batched los rota sin reconstruir en cada iteración
-                b.iter_batched(
-                    || build_pair(shared_n, delta).1,  // setup: un bl_b fresco
-                    |mut bl_b_fresh| {
-                        bl_b_fresh.merge_blocks(blocks_to_merge.clone()).unwrap();
-                        std::hint::black_box(bl_b_fresh);
-                    },
-                    criterion::BatchSize::SmallInput,
-                );
-            },
-        );
+            // Pre-construir el pool de receptores fuera del loop de Criterion
+            // iter_batched los rota sin reconstruir en cada iteración
+            b.iter_batched(
+                || build_pair(shared_n, delta).1, // setup: un bl_b fresco
+                |mut bl_b_fresh| {
+                    bl_b_fresh.merge_blocks(blocks_to_merge.clone()).unwrap();
+                    std::hint::black_box(bl_b_fresh);
+                },
+                criterion::BatchSize::SmallInput,
+            );
+        });
     }
     group.finish();
 }

@@ -145,12 +145,20 @@ impl AuditLog {
     /// Intended for the institution's administrator dashboard and for
     /// regulatory inspection (§4.2, §4.3).
     pub fn records(&self) -> Vec<AuditRecord> {
-        self.inner.lock().expect("audit log mutex poisoned").records.clone()
+        self.inner
+            .lock()
+            .expect("audit log mutex poisoned")
+            .records
+            .clone()
     }
 
     /// Returns the total number of records logged this session.
     pub fn len(&self) -> usize {
-        self.inner.lock().expect("audit log mutex poisoned").records.len()
+        self.inner
+            .lock()
+            .expect("audit log mutex poisoned")
+            .records
+            .len()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -209,7 +217,7 @@ mod tests {
         let rec = &log.records()[0];
         // If this compiles, the record type has no content field.
         let _: &Option<ContextualId> = &rec.peer_cii;
-        let _: &Option<Sha256Hash>   = &rec.block_hash;
+        let _: &Option<Sha256Hash> = &rec.block_hash;
         // There is no `payload`, `credential_json`, or `frontier` field.
     }
 }

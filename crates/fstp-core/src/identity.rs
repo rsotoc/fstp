@@ -43,7 +43,9 @@ impl FederationContext {
         let mut info = Vec::new();
         info.extend_from_slice(self.link_id.as_bytes());
 
-        let sanitized_url = self.counterpart_endpoint.url
+        let sanitized_url = self
+            .counterpart_endpoint
+            .url
             .trim_end_matches('/')
             .to_lowercase();
 
@@ -140,10 +142,7 @@ mod tests {
     }
 
     fn make_context(link_id: Uuid, url: &str) -> FederationContext {
-        FederationContext::new(
-            link_id,
-            FederationEndpoint::new(url, "deadbeef"),
-        )
+        FederationContext::new(link_id, FederationEndpoint::new(url, "deadbeef"))
     }
 
     /// Property: derive_cii is deterministic.
@@ -193,14 +192,10 @@ mod tests {
         let id = Uuid::parse_str("550e8400-e29b-41d4-a716-446655440000").unwrap();
         let url = "https://example.com";
 
-        let ctx_old_cert = FederationContext::new(
-            id,
-            FederationEndpoint::new(url, "old-fingerprint"),
-        );
-        let ctx_new_cert = FederationContext::new(
-            id,
-            FederationEndpoint::new(url, "new-fingerprint"),
-        );
+        let ctx_old_cert =
+            FederationContext::new(id, FederationEndpoint::new(url, "old-fingerprint"));
+        let ctx_new_cert =
+            FederationContext::new(id, FederationEndpoint::new(url, "new-fingerprint"));
         assert_eq!(
             gii.derive_cii(&ctx_old_cert),
             gii.derive_cii(&ctx_new_cert),

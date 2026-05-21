@@ -12,10 +12,7 @@ pub async fn notify_presentation(
     credential_type: &str,
     subject_cii: &ContextualId,
 ) {
-    let (Ok(base), Ok(key)) = (
-        std::env::var("FSTP_AGORA_BASE_URL"),
-        pod_agent_key(),
-    ) else {
+    let (Ok(base), Ok(key)) = (std::env::var("FSTP_AGORA_BASE_URL"), pod_agent_key()) else {
         return;
     };
     let url = format!(
@@ -40,10 +37,7 @@ pub async fn notify_federation_event(
     event_hash: &Sha256Hash,
     link_id: uuid::Uuid,
 ) {
-    let (Ok(base), Ok(key)) = (
-        std::env::var("FSTP_AGORA_BASE_URL"),
-        pod_agent_key(),
-    ) else {
+    let (Ok(base), Ok(key)) = (std::env::var("FSTP_AGORA_BASE_URL"), pod_agent_key()) else {
         return;
     };
     let url = format!(

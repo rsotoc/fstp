@@ -30,8 +30,8 @@ pub mod audit;
 pub mod blocklace;
 pub mod crypto;
 pub mod identity;
-pub mod registry;
 pub mod message;
+pub mod registry;
 pub mod sa_machine;
 pub mod types;
 pub mod utils;
@@ -41,8 +41,8 @@ pub mod utils;
 pub use audit::{AuditLog, AuditRecord, Direction};
 
 pub use blocklace::{
-    AggregateAttrs, Block, BlockPayload, BlocklaceStore, DanglingPointer,
-    ErasureReason, FrontierExport, InMemoryBlocklace, IntegrityReport,
+    AggregateAttrs, Block, BlockPayload, BlocklaceStore, DanglingPointer, ErasureReason,
+    FrontierExport, InMemoryBlocklace, IntegrityReport,
 };
 
 pub use crypto::{verify_request_signature, verify_response_signature, NodeSigner};
@@ -51,20 +51,19 @@ pub use identity::{FederationContext, GlobalInstanceId};
 pub use registry::IssuerRegistry;
 
 pub use message::{
-    CredentialType, CredentialValidity, EventClass,
-    FederationEventKind, IdentityEventKind, FstpMessage,
+    CredentialType, CredentialValidity, EventClass, FederationEventKind, FstpMessage,
+    IdentityEventKind,
 };
 
 pub use sa_machine::{
-    FederationControlType, OperationOutcome, OperationRecord, SaOutboundArtifact,
-    SaTransaction, TransmitOutcome, ValidationContext, ValidationError,
-    Composing, Idle, Logging, Transmitting, Validating,
+    Composing, FederationControlType, Idle, Logging, OperationOutcome, OperationRecord,
+    SaOutboundArtifact, SaTransaction, TransmitOutcome, Transmitting, Validating,
+    ValidationContext, ValidationError,
 };
 
 pub use types::{
-    ContextualId, Did, Ed25519Sig, FederationEndpoint, FrontierRequest,
-    FrontierResponse, FstpError, LinkId, PublicKey, RejectionReason, Result,
-    Sha256Hash, SyncOutcome, SyncResult,
+    ContextualId, Did, Ed25519Sig, FederationEndpoint, FrontierRequest, FrontierResponse,
+    FstpError, LinkId, PublicKey, RejectionReason, Result, Sha256Hash, SyncOutcome, SyncResult,
 };
 
 pub use utils::now_utc;

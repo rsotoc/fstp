@@ -119,8 +119,8 @@ pub async fn verify_credential(
 }
 
 fn parse_pubkey_hex(hex_str: &str) -> Result<ed25519_dalek::VerifyingKey, String> {
-    let pubkey_bytes = hex::decode(hex_str.trim())
-        .map_err(|_| "invalid public key hex format".to_string())?;
+    let pubkey_bytes =
+        hex::decode(hex_str.trim()).map_err(|_| "invalid public key hex format".to_string())?;
     let pubkey_array: [u8; 32] = pubkey_bytes
         .try_into()
         .map_err(|_| "Ed25519 public key must be 32 bytes".to_string())?;
@@ -137,5 +137,7 @@ fn invalid(msg: impl Into<String>) -> VerifyCredentialOutput {
 }
 
 fn contract_version() -> Option<String> {
-    std::env::var("FSTP_CONTRACT_VERSION").ok().or_else(|| Some("1.0.0".into()))
+    std::env::var("FSTP_CONTRACT_VERSION")
+        .ok()
+        .or_else(|| Some("1.0.0".into()))
 }

@@ -111,7 +111,11 @@ pub trait BlocklaceStore {
     fn verify_chain(&self) -> IntegrityReport;
     fn sync_delta(&self, remote_frontier: &[Sha256Hash]) -> Vec<Block>;
     fn merge_blocks(&mut self, blocks: Vec<Block>) -> Result<()>;
-    fn fulfill_erasure(&mut self, event_hash: Sha256Hash, reason: ErasureReason) -> Result<DanglingPointer>;
+    fn fulfill_erasure(
+        &mut self,
+        event_hash: Sha256Hash,
+        reason: ErasureReason,
+    ) -> Result<DanglingPointer>;
     fn dangling_pointers(&self) -> Vec<&DanglingPointer>;
     fn export_frontier(&self) -> FrontierExport;
 }
@@ -138,11 +142,15 @@ impl InMemoryBlocklace {
 
     /// OPTIMIZACIÓN COMPLETA: Cálculo incremental en O(N) solo para inicialización reconstructiva o fallback
     pub fn rebuild_frontier_cache(&mut self) {
-        let all_parents: HashSet<Sha256Hash> = self.blocks.values()
+        let all_parents: HashSet<Sha256Hash> = self
+            .blocks
+            .values()
             .flat_map(|b| b.parents.iter().cloned())
             .collect();
 
-        self.frontier_cache = self.blocks.keys()
+        self.frontier_cache = self
+            .blocks
+            .keys()
             .filter(|h| !all_parents.contains(h))
             .cloned()
             .collect();
@@ -263,7 +271,9 @@ impl BlocklaceStore for InMemoryBlocklace {
                     block.block_hash, computed
                 )));
             }
-            self.blocks.entry(block.block_hash.clone()).or_insert(block.clone());
+            self.blocks
+                .entry(block.block_hash.clone())
+                .or_insert(block.clone());
         }
         // Actualización incremental: solo tocar los bloques nuevos
         for block in &blocks {
@@ -277,8 +287,14 @@ impl BlocklaceStore for InMemoryBlocklace {
         Ok(())
     }
 
-    fn fulfill_erasure(&mut self, event_hash: Sha256Hash, reason: ErasureReason) -> Result<DanglingPointer> {
-        let block_hash = self.blocks.values()
+    fn fulfill_erasure(
+        &mut self,
+        event_hash: Sha256Hash,
+        reason: ErasureReason,
+    ) -> Result<DanglingPointer> {
+        let block_hash = self
+            .blocks
+            .values()
             .find(|b| b.payload.event_hash == event_hash)
             .map(|b| b.block_hash.clone())
             .ok_or_else(|| FstpError::BlockNotFound(event_hash.clone()))?;
@@ -365,14 +381,21 @@ mod tests {
         bl_a.append(dummy_payload(3), dummy_sig()).unwrap();
 
         let report = bl_a.verify_chain();
-        assert!(report.valid, "verify_chain must pass on a multi-parent DAG: {:?}", report.corrupted_blocks);
+        assert!(
+            report.valid,
+            "verify_chain must pass on a multi-parent DAG: {:?}",
+            report.corrupted_blocks
+        );
         assert!(report.corrupted_blocks.is_empty());
 
         // bl_b receives block_a and also converges
         bl_b.merge_blocks(vec![block_a]).unwrap();
         bl_b.append(dummy_payload(4), dummy_sig()).unwrap();
         let report_b = bl_b.verify_chain();
-        assert!(report_b.valid, "verify_chain must pass on bl_b multi-parent DAG");
+        assert!(
+            report_b.valid,
+            "verify_chain must pass on bl_b multi-parent DAG"
+        );
     }
 
     #[test]
@@ -393,7 +416,8 @@ mod tests {
         bl.append(payload, dummy_sig()).unwrap();
         bl.append(dummy_payload(43), dummy_sig()).unwrap();
 
-        bl.fulfill_erasure(event_hash, ErasureReason::DataSubjectRequest).unwrap();
+        bl.fulfill_erasure(event_hash, ErasureReason::DataSubjectRequest)
+            .unwrap();
 
         let report = bl.verify_chain();
         assert!(report.valid, "Chain must remain valid after erasure");
@@ -410,7 +434,11 @@ mod tests {
 
         bl_a.append(dummy_payload(2), dummy_sig()).unwrap();
         let delta = bl_a.sync_delta(&bl_b.frontier());
-        assert_eq!(delta.len(), 1, "Delta must contain exactly the missing block");
+        assert_eq!(
+            delta.len(),
+            1,
+            "Delta must contain exactly the missing block"
+        );
     }
 
     #[test]
@@ -431,7 +459,10 @@ mod tests {
 
         let mut bl_b = InMemoryBlocklace::new();
         let result = bl_b.merge_blocks(vec![block]);
-        assert!(matches!(result, Err(FstpError::CryptoError(_))), "Tampered block must be rejected");
+        assert!(
+            matches!(result, Err(FstpError::CryptoError(_))),
+            "Tampered block must be rejected"
+        );
     }
 
     #[test]
@@ -440,7 +471,8 @@ mod tests {
         let payload = dummy_payload(7);
         let event_hash = payload.event_hash.clone();
         bl.append(payload, dummy_sig()).unwrap();
-        bl.fulfill_erasure(event_hash.clone(), ErasureReason::RetentionExpiry).unwrap();
+        bl.fulfill_erasure(event_hash.clone(), ErasureReason::RetentionExpiry)
+            .unwrap();
         let result = bl.fulfill_erasure(event_hash, ErasureReason::RetentionExpiry);
         assert!(matches!(result, Err(FstpError::ErasureAlreadyFulfilled(_))));
     }
@@ -452,7 +484,8 @@ mod tests {
         let payload = dummy_payload(2);
         let eh = payload.event_hash.clone();
         bl.append(payload, dummy_sig()).unwrap();
-        bl.fulfill_erasure(eh, ErasureReason::AdministrativeDecision).unwrap();
+        bl.fulfill_erasure(eh, ErasureReason::AdministrativeDecision)
+            .unwrap();
 
         let export = bl.export_frontier();
         assert_eq!(export.total_blocks, 2);

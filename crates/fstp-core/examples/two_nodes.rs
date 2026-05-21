@@ -55,8 +55,14 @@ fn main() {
     let audit_a = AuditLog::new();
     let audit_b = AuditLog::new();
 
-    println!("Node A pubkey: {}", hex::encode(signer_a.public_key().0.as_bytes()));
-    println!("Node B pubkey: {}", hex::encode(signer_b.public_key().0.as_bytes()));
+    println!(
+        "Node A pubkey: {}",
+        hex::encode(signer_a.public_key().0.as_bytes())
+    );
+    println!(
+        "Node B pubkey: {}",
+        hex::encode(signer_b.public_key().0.as_bytes())
+    );
     println!("Federation link: {link_id}\n");
 
     // ── 2. Shared genesis block ───────────────────────────────────────────────
@@ -73,8 +79,10 @@ fn main() {
     let block_b1 = bl_b.append(payload(3), dummy_sig()).unwrap();
 
     println!("\n[Divergence]");
-    println!("  Node A: +2 local blocks ({}, {})",
-        block_a1.block_hash, block_a2.block_hash);
+    println!(
+        "  Node A: +2 local blocks ({}, {})",
+        block_a1.block_hash, block_a2.block_hash
+    );
     println!("  Node B: +1 local block  ({})", block_b1.block_hash);
     println!("  A frontier size: {}", bl_a.frontier().len());
     println!("  B frontier size: {}", bl_b.frontier().len());
@@ -98,18 +106,37 @@ fn main() {
 
     // B verifies A's response using A's public key (looked up from IdentityEvent,
     // not from the response itself)
-    verify_response_signature(&cii_a, &link_id, &frontier_a, &ts_a, &sig_a, &signer_a.public_key())
-        .expect("B must accept A's signed frontier");
+    verify_response_signature(
+        &cii_a,
+        &link_id,
+        &frontier_a,
+        &ts_a,
+        &sig_a,
+        &signer_a.public_key(),
+    )
+    .expect("B must accept A's signed frontier");
     println!("\n[Auth] B verified A's FrontierResponse signature ✓");
 
-    verify_response_signature(&cii_b, &link_id, &frontier_b, &ts_b, &sig_b, &signer_b.public_key())
-        .expect("A must accept B's signed frontier");
+    verify_response_signature(
+        &cii_b,
+        &link_id,
+        &frontier_b,
+        &ts_b,
+        &sig_b,
+        &signer_b.public_key(),
+    )
+    .expect("A must accept B's signed frontier");
     println!("[Auth] A verified B's FrontierResponse signature ✓");
 
     // Tampered signature must be rejected
     let tampered_sig = signer_b.sign_response(&cii_a, &link_id, &frontier_a, &ts_a);
     let rejected = verify_response_signature(
-        &cii_a, &link_id, &frontier_a, &ts_a, &tampered_sig, &signer_a.public_key()
+        &cii_a,
+        &link_id,
+        &frontier_a,
+        &ts_a,
+        &tampered_sig,
+        &signer_a.public_key(),
     );
     assert!(rejected.is_err(), "Tampered signature must be rejected");
     println!("[Auth] Tampered signature correctly rejected ✓");
@@ -119,28 +146,71 @@ fn main() {
     bl_a.merge_blocks(delta_b_to_a).unwrap();
 
     println!("\n[After sync]");
-    println!("  Node A: {} total blocks, frontier size {}",
-        bl_a.verify_chain().total_blocks, bl_a.frontier().len());
-    println!("  Node B: {} total blocks, frontier size {}",
-        bl_b.verify_chain().total_blocks, bl_b.frontier().len());
+    println!(
+        "  Node A: {} total blocks, frontier size {}",
+        bl_a.verify_chain().total_blocks,
+        bl_a.frontier().len()
+    );
+    println!(
+        "  Node B: {} total blocks, frontier size {}",
+        bl_b.verify_chain().total_blocks,
+        bl_b.frontier().len()
+    );
 
     // ── 7. Integrity verification ─────────────────────────────────────────────
     let report_a = bl_a.verify_chain();
     let report_b = bl_b.verify_chain();
 
-    assert!(report_a.valid, "Node A chain must be valid: {:?}", report_a.corrupted_blocks);
-    assert!(report_b.valid, "Node B chain must be valid: {:?}", report_b.corrupted_blocks);
-    assert_eq!(report_a.total_blocks, report_b.total_blocks,
-        "Both nodes must hold the same number of blocks after sync");
+    assert!(
+        report_a.valid,
+        "Node A chain must be valid: {:?}",
+        report_a.corrupted_blocks
+    );
+    assert!(
+        report_b.valid,
+        "Node B chain must be valid: {:?}",
+        report_b.corrupted_blocks
+    );
+    assert_eq!(
+        report_a.total_blocks, report_b.total_blocks,
+        "Both nodes must hold the same number of blocks after sync"
+    );
 
     println!("\n[Integrity] Both chains valid ✓");
-    println!("[Integrity] Block count consistent ({} blocks each) ✓", report_a.total_blocks);
+    println!(
+        "[Integrity] Block count consistent ({} blocks each) ✓",
+        report_a.total_blocks
+    );
 
     // ── 8. Audit log ──────────────────────────────────────────────────────────
-    audit_a.record_outbound("event_hash", Some(cii_b.clone()), Some(link_id), None, Some(2));
-    audit_a.record_inbound("block_push", Some(cii_b.clone()), Some(link_id), None, Some(1));
-    audit_b.record_outbound("event_hash", Some(cii_a.clone()), Some(link_id), None, Some(1));
-    audit_b.record_inbound("block_push", Some(cii_a.clone()), Some(link_id), None, Some(2));
+    audit_a.record_outbound(
+        "event_hash",
+        Some(cii_b.clone()),
+        Some(link_id),
+        None,
+        Some(2),
+    );
+    audit_a.record_inbound(
+        "block_push",
+        Some(cii_b.clone()),
+        Some(link_id),
+        None,
+        Some(1),
+    );
+    audit_b.record_outbound(
+        "event_hash",
+        Some(cii_a.clone()),
+        Some(link_id),
+        None,
+        Some(1),
+    );
+    audit_b.record_inbound(
+        "block_push",
+        Some(cii_a.clone()),
+        Some(link_id),
+        None,
+        Some(2),
+    );
 
     println!("\n[Audit] Node A: {} record(s) logged", audit_a.len());
     println!("[Audit] Node B: {} record(s) logged", audit_b.len());

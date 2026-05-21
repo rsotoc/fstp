@@ -13,10 +13,7 @@ pub fn spawn(state: SharedState, interval_secs: u64) {
     tokio::spawn(async move {
         let client = FstpClient::new();
         let interval = Duration::from_secs(interval_secs.max(30));
-        info!(
-            secs = interval_secs,
-            "FSTP periodic sync scheduler started"
-        );
+        info!(secs = interval_secs, "FSTP periodic sync scheduler started");
         loop {
             tokio::time::sleep(interval).await;
             let peers: Vec<(uuid::Uuid, fstp_core::types::FederationEndpoint)> = {

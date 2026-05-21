@@ -15,15 +15,13 @@ use axum::{
 };
 
 use ed25519_dalek::Verifier;
-use fstp_core::blocklace::{AggregateAttrs, Block, BlocklaceStore, BlockPayload};
+use fstp_core::blocklace::{AggregateAttrs, Block, BlockPayload, BlocklaceStore};
 use fstp_core::crypto::verify_request_signature;
 use fstp_core::identity::FederationContext;
-use fstp_core::message::{
-    CredentialType, CredentialValidity, EventClass, FederationEventKind,
-};
+use fstp_core::message::{CredentialType, CredentialValidity, EventClass, FederationEventKind};
 use fstp_core::sa_machine::{
-    OperationOutcome, OperationRecord, SaOutboundArtifact,
-    SaTransaction, TransmitOutcome, ValidationContext, Idle,
+    Idle, OperationOutcome, OperationRecord, SaOutboundArtifact, SaTransaction, TransmitOutcome,
+    ValidationContext,
 };
 use fstp_core::types::{
     ContextualId, Did, Ed25519Sig, FederationEndpoint, FrontierRequest, FrontierResponse,
@@ -89,9 +87,9 @@ pub async fn frontier_handler(
     let validating = tx.start_validation();
 
     let ctx = ValidationContext {
-        sender_cii:         payload.sender_cii.clone(),
-        expected_cii:       peer_identity.entry.peer_cii.clone(),
-        timestamp:          payload.timestamp,
+        sender_cii: payload.sender_cii.clone(),
+        expected_cii: peer_identity.entry.peer_cii.clone(),
+        timestamp: payload.timestamp,
         replay_window_secs: 300,
     };
 
@@ -101,10 +99,10 @@ pub async fn frontier_handler(
             let record = OperationRecord {
                 operation_id: logging_tx.operation_id,
                 message_type: "FrontierRequest".into(),
-                peer_cii:    Some(payload.sender_cii.clone()),
-                link_id:     Some(payload.link_id),
+                peer_cii: Some(payload.sender_cii.clone()),
+                link_id: Some(payload.link_id),
                 block_count: None,
-                outcome:     OperationOutcome::ValidationFailed(format!("{ve:?}")),
+                outcome: OperationOutcome::ValidationFailed(format!("{ve:?}")),
                 duration_ms: 0,
             };
             logging_tx.log_and_complete(record);
@@ -134,31 +132,29 @@ pub async fn frontier_handler(
     let missing_blocks: Vec<Block> = state_read.blocklace.sync_delta(&payload.frontier);
     let local_frontier = state_read.blocklace.frontier();
     let timestamp = now_utc();
-    let signature = state_read.signer.sign_response(
-        &own_cii,
-        &payload.link_id,
-        &local_frontier,
-        &timestamp,
-    );
+    let signature =
+        state_read
+            .signer
+            .sign_response(&own_cii, &payload.link_id, &local_frontier, &timestamp);
     drop(state_read);
 
     let block_count = missing_blocks.len();
 
     let artifact = SaOutboundArtifact::FrontierResponse {
         responder_cii: own_cii.clone(),
-        link_id:       payload.link_id,
-        blocks:        missing_blocks.clone(),
-        frontier:      local_frontier.clone(),
+        link_id: payload.link_id,
+        blocks: missing_blocks.clone(),
+        frontier: local_frontier.clone(),
         timestamp,
-        signature:     signature.clone(),
+        signature: signature.clone(),
     };
 
     // ── Transmitting → Logging ─────────────────────────────────────────────
     let transmitting = composing.compose(artifact);
 
     let response = FrontierResponse {
-        responder_cii:      own_cii,
-        link_id:            payload.link_id,
+        responder_cii: own_cii,
+        link_id: payload.link_id,
         missing_blocks,
         responder_frontier: local_frontier,
         timestamp,
@@ -170,10 +166,10 @@ pub async fn frontier_handler(
     let record = OperationRecord {
         operation_id: logging_tx.operation_id,
         message_type: "FrontierResponse".into(),
-        peer_cii:    Some(payload.sender_cii),
-        link_id:     Some(payload.link_id),
+        peer_cii: Some(payload.sender_cii),
+        link_id: Some(payload.link_id),
         block_count: Some(block_count),
-        outcome:     OperationOutcome::Success,
+        outcome: OperationOutcome::Success,
         duration_ms: (now_utc() - logging_tx.started_at).num_milliseconds(),
     };
     logging_tx.log_and_complete(record);
@@ -209,9 +205,9 @@ pub async fn blocks_handler(
     // For inbound block pushes the "sender CII" is authenticated via mTLS;
     // we use a permissive validation context (CIIs match by construction).
     let ctx = ValidationContext {
-        sender_cii:         peer_identity.entry.peer_cii.clone(),
-        expected_cii:       peer_identity.entry.peer_cii.clone(),
-        timestamp:          now_utc(),
+        sender_cii: peer_identity.entry.peer_cii.clone(),
+        expected_cii: peer_identity.entry.peer_cii.clone(),
+        timestamp: now_utc(),
         replay_window_secs: 300,
     };
 
@@ -221,10 +217,10 @@ pub async fn blocks_handler(
             let record = OperationRecord {
                 operation_id: logging_tx.operation_id,
                 message_type: "BlockPush".into(),
-                peer_cii:    peer_identity.cii.clone(),
-                link_id:     None,
+                peer_cii: peer_identity.cii.clone(),
+                link_id: None,
                 block_count: Some(block_count),
-                outcome:     OperationOutcome::ValidationFailed(format!("{ve:?}")),
+                outcome: OperationOutcome::ValidationFailed(format!("{ve:?}")),
                 duration_ms: 0,
             };
             logging_tx.log_and_complete(record);
@@ -252,19 +248,21 @@ pub async fn blocks_handler(
     let record = OperationRecord {
         operation_id: logging_tx.operation_id,
         message_type: "BlockPush".into(),
-        peer_cii:    peer_identity.cii.clone(),
-        link_id:     None,
+        peer_cii: peer_identity.cii.clone(),
+        link_id: None,
         block_count: Some(block_count),
-        outcome:     outcome.clone(),
+        outcome: outcome.clone(),
         duration_ms: (now_utc() - logging_tx.started_at).num_milliseconds(),
     };
     logging_tx.log_and_complete(record);
 
     match outcome {
-        OperationOutcome::Success =>
-            (StatusCode::OK, Json(serde_json::json!({ "status": "success" }))).into_response(),
-        _ =>
-            (status, "MERGE_FAILED").into_response(),
+        OperationOutcome::Success => (
+            StatusCode::OK,
+            Json(serde_json::json!({ "status": "success" })),
+        )
+            .into_response(),
+        _ => (status, "MERGE_FAILED").into_response(),
     }
 }
 
@@ -274,9 +272,9 @@ pub async fn blocks_handler(
 
 pub async fn health_handler(State(state): State<SharedState>) -> Response {
     let state_guard = state.read().await;
-    let report     = state_guard.blocklace.verify_chain();
+    let report = state_guard.blocklace.verify_chain();
     let peer_count = state_guard.federation.len();
-    let audit_len  = state_guard.audit.len();
+    let audit_len = state_guard.audit.len();
 
     let status = if report.valid {
         StatusCode::OK
@@ -303,15 +301,15 @@ pub async fn health_handler(State(state): State<SharedState>) -> Response {
 
 #[derive(Debug, serde::Deserialize)]
 pub struct RegisterPeerRequest {
-    pub peer_cii:         String,
-    pub link_id:          uuid::Uuid,
+    pub peer_cii: String,
+    pub link_id: uuid::Uuid,
     pub cert_fingerprint: String,
-    pub endpoint_url:     String,
+    pub endpoint_url: String,
     /// Hex-encoded Ed25519 public key of the peer (32 bytes).
     /// Received via the peer's IdentityEvent during link establishment.
-    pub peer_pubkey_hex:  String,
+    pub peer_pubkey_hex: String,
     /// Institutional DID for HU-06 lookup (optional, Phase 3).
-    pub peer_did:         Option<String>,
+    pub peer_did: Option<String>,
 }
 
 /// **POST /fstp/admin/peers**
@@ -325,41 +323,59 @@ pub async fn register_peer_handler(
     State(state): State<SharedState>,
     Json(req): Json<RegisterPeerRequest>,
 ) -> Response {
-    use fstp_core::types::{ContextualId, FederationEndpoint, PublicKey};
     use crate::server::FederationEntry;
+    use fstp_core::types::{ContextualId, FederationEndpoint, PublicKey};
 
     let pubkey_bytes = match hex::decode(&req.peer_pubkey_hex) {
         Ok(b) => b,
-        Err(_) => return (StatusCode::BAD_REQUEST,
-            Json(serde_json::json!({"error": "invalid peer_pubkey_hex"}))).into_response(),
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error": "invalid peer_pubkey_hex"})),
+            )
+                .into_response()
+        }
     };
 
     let pubkey_array: [u8; 32] = match pubkey_bytes.try_into() {
         Ok(a) => a,
-        Err(_) => return (StatusCode::BAD_REQUEST,
-            Json(serde_json::json!({"error": "peer_pubkey_hex must be 32 bytes"}))).into_response(),
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error": "peer_pubkey_hex must be 32 bytes"})),
+            )
+                .into_response()
+        }
     };
 
     let verifying_key = match ed25519_dalek::VerifyingKey::from_bytes(&pubkey_array) {
         Ok(k) => k,
-        Err(e) => return (StatusCode::BAD_REQUEST,
-            Json(serde_json::json!({"error": format!("invalid Ed25519 pubkey: {e}")}))).into_response(),
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error": format!("invalid Ed25519 pubkey: {e}")})),
+            )
+                .into_response()
+        }
     };
 
     let mut state_guard = state.write().await;
 
     if state_guard.federation.contains_key(&req.cert_fingerprint) {
-        return (StatusCode::CONFLICT,
-            Json(serde_json::json!({"error": "peer already registered"}))).into_response();
+        return (
+            StatusCode::CONFLICT,
+            Json(serde_json::json!({"error": "peer already registered"})),
+        )
+            .into_response();
     }
 
     state_guard.register_peer(FederationEntry {
-        peer_cii:         ContextualId::new(&req.peer_cii),
-        link_id:          req.link_id,
+        peer_cii: ContextualId::new(&req.peer_cii),
+        link_id: req.link_id,
         cert_fingerprint: req.cert_fingerprint.clone(),
-        endpoint:         FederationEndpoint::new(&req.endpoint_url, &req.cert_fingerprint),
-        peer_did:         req.peer_did.clone(),
-        peer_pubkey:      PublicKey(verifying_key),
+        endpoint: FederationEndpoint::new(&req.endpoint_url, &req.cert_fingerprint),
+        peer_did: req.peer_did.clone(),
+        peer_pubkey: PublicKey(verifying_key),
     });
 
     tracing::info!(
@@ -368,11 +384,15 @@ pub async fn register_peer_handler(
         "Admin: new federation peer registered at runtime"
     );
 
-    (StatusCode::CREATED, Json(serde_json::json!({
-        "status":   "registered",
-        "peer_cii": req.peer_cii,
-        "link_id":  req.link_id.to_string(),
-    }))).into_response()
+    (
+        StatusCode::CREATED,
+        Json(serde_json::json!({
+            "status":   "registered",
+            "peer_cii": req.peer_cii,
+            "link_id":  req.link_id.to_string(),
+        })),
+    )
+        .into_response()
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -456,10 +476,7 @@ pub async fn present_credential_handler(
 
         let ctx = FederationContext::new(
             req.link_id,
-            FederationEndpoint::new(
-                &req.counterpart_url,
-                &peer_identity.cert_fingerprint,
-            ),
+            FederationEndpoint::new(&req.counterpart_url, &peer_identity.cert_fingerprint),
         );
         let subject_cii = state_read.gii.derive_subject_cii(&ctx, &req.subject_id);
         (subject_cii, state_read.audit.clone())
@@ -505,7 +522,8 @@ pub async fn present_credential_handler(
             Ok(block) => format!("{}", block.block_hash),
             Err(e) => {
                 tracing::error!(error = %e, "PresentCredential blocklace append failed");
-                return (StatusCode::INTERNAL_SERVER_ERROR, "BLOCKLACE_APPEND_FAILED").into_response();
+                return (StatusCode::INTERNAL_SERVER_ERROR, "BLOCKLACE_APPEND_FAILED")
+                    .into_response();
             }
         }
     };
@@ -664,7 +682,8 @@ pub async fn federation_control_handler(
             Ok(block) => format!("{}", block.block_hash),
             Err(e) => {
                 tracing::error!(error = %e, "FederationControl blocklace append failed");
-                return (StatusCode::INTERNAL_SERVER_ERROR, "BLOCKLACE_APPEND_FAILED").into_response();
+                return (StatusCode::INTERNAL_SERVER_ERROR, "BLOCKLACE_APPEND_FAILED")
+                    .into_response();
             }
         }
     };
@@ -766,4 +785,3 @@ fn parse_ed25519_sig_hex(hex_str: &str) -> Result<Ed25519Sig, StatusCode> {
     let sig = ed25519_dalek::Signature::from_slice(&bytes).map_err(|_| StatusCode::BAD_REQUEST)?;
     Ok(Ed25519Sig(sig))
 }
-

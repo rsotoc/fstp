@@ -35,8 +35,8 @@ use std::marker::PhantomData;
 
 use crate::audit::AuditLog;
 use crate::blocklace::Block;
-use crate::types::{ContextualId, Ed25519Sig, FstpError, LinkId, Result, Sha256Hash};
 use crate::message::{AggregateAttrs, EventClass};
+use crate::types::{ContextualId, Ed25519Sig, FstpError, LinkId, Result, Sha256Hash};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // State markers (zero-size types — erased at compile time)
@@ -142,20 +142,25 @@ pub struct ValidationContext {
 
 #[derive(Debug)]
 pub enum ValidationError {
-    CiiMismatch { got: ContextualId, expected: ContextualId },
-    TimestampOutOfWindow { delta_secs: i64, window: i64 },
+    CiiMismatch {
+        got: ContextualId,
+        expected: ContextualId,
+    },
+    TimestampOutOfWindow {
+        delta_secs: i64,
+        window: i64,
+    },
     ConfinementViolation(String),
 }
 
 impl From<ValidationError> for FstpError {
     fn from(e: ValidationError) -> Self {
         match e {
-            ValidationError::CiiMismatch { got, .. } =>
-                FstpError::UnknownCii(got),
-            ValidationError::TimestampOutOfWindow { .. } =>
-                FstpError::MessageRejected(crate::types::RejectionReason::TimestampOutOfWindow),
-            ValidationError::ConfinementViolation(_) =>
-                FstpError::ConfinementViolation,
+            ValidationError::CiiMismatch { got, .. } => FstpError::UnknownCii(got),
+            ValidationError::TimestampOutOfWindow { .. } => {
+                FstpError::MessageRejected(crate::types::RejectionReason::TimestampOutOfWindow)
+            }
+            ValidationError::ConfinementViolation(_) => FstpError::ConfinementViolation,
         }
     }
 }
@@ -210,7 +215,8 @@ impl SaTransaction<Validating> {
     pub fn validate(
         self,
         ctx: &ValidationContext,
-    ) -> std::result::Result<SaTransaction<Composing>, (SaTransaction<Logging>, ValidationError)> {
+    ) -> std::result::Result<SaTransaction<Composing>, (SaTransaction<Logging>, ValidationError)>
+    {
         // Check 1: CII matches authenticated peer
         if ctx.sender_cii != ctx.expected_cii {
             let err = ValidationError::CiiMismatch {
@@ -257,10 +263,7 @@ impl SaTransaction<Composing> {
     ///
     /// The type of `artifact` is `SaOutboundArtifact` — a closed enum.
     /// The compiler statically rejects any D_raw value here (Property 2.1).
-    pub fn compose(
-        self,
-        artifact: SaOutboundArtifact,
-    ) -> SaTransaction<Transmitting> {
+    pub fn compose(self, artifact: SaOutboundArtifact) -> SaTransaction<Transmitting> {
         SaTransaction {
             operation_id: self.operation_id,
             started_at: self.started_at,
@@ -338,9 +341,9 @@ impl SaTransaction<Logging> {
     pub fn log_and_complete(self, record: OperationRecord) -> SaTransaction<Idle> {
         // Write structured audit entry — no content fields
         let outcome_str = match &record.outcome {
-            OperationOutcome::Success              => "success".to_string(),
+            OperationOutcome::Success => "success".to_string(),
             OperationOutcome::ValidationFailed(r) => format!("validation_failed:{r}"),
-            OperationOutcome::NetworkFailed(r)    => format!("network_failed:{r}"),
+            OperationOutcome::NetworkFailed(r) => format!("network_failed:{r}"),
         };
 
         self.audit.record_outbound(
@@ -479,9 +482,9 @@ mod tests {
 
     fn valid_ctx(cii: &str) -> ValidationContext {
         ValidationContext {
-            sender_cii:         ContextualId::new(cii),
-            expected_cii:       ContextualId::new(cii),
-            timestamp:          Utc::now(),
+            sender_cii: ContextualId::new(cii),
+            expected_cii: ContextualId::new(cii),
+            timestamp: Utc::now(),
             replay_window_secs: 300,
         }
     }
@@ -492,16 +495,16 @@ mod tests {
         let audit = AuditLog::new();
         let tx = SaTransaction::<Idle>::begin(audit);
         let tx = tx.start_validation();
-        let tx = tx.validate(&valid_ctx("cii:peer")).expect("valid ctx must pass");
+        let tx = tx
+            .validate(&valid_ctx("cii:peer"))
+            .expect("valid ctx must pass");
 
         let artifact = SaOutboundArtifact::FederationControl {
             control_type: FederationControlType::Establish,
             from_cii: ContextualId::new("cii:local"),
-            to_cii:   ContextualId::new("cii:peer"),
-            link_id:  uuid::Uuid::new_v4(),
-            signature: crate::types::Ed25519Sig(
-                ed25519_dalek::Signature::from_bytes(&[0u8; 64])
-            ),
+            to_cii: ContextualId::new("cii:peer"),
+            link_id: uuid::Uuid::new_v4(),
+            signature: crate::types::Ed25519Sig(ed25519_dalek::Signature::from_bytes(&[0u8; 64])),
         };
 
         let tx = tx.compose(artifact);
@@ -512,10 +515,10 @@ mod tests {
         let record = OperationRecord {
             operation_id: tx.operation_id,
             message_type: "federation_control".into(),
-            peer_cii:    Some(ContextualId::new("cii:peer")),
-            link_id:     None,
+            peer_cii: Some(ContextualId::new("cii:peer")),
+            link_id: None,
             block_count: None,
-            outcome:     OperationOutcome::Success,
+            outcome: OperationOutcome::Success,
             duration_ms: 0,
         };
         let _idle = tx.log_and_complete(record);
@@ -530,9 +533,9 @@ mod tests {
         let tx = tx.start_validation();
 
         let bad_ctx = ValidationContext {
-            sender_cii:         ContextualId::new("cii:attacker"),
-            expected_cii:       ContextualId::new("cii:known-peer"),
-            timestamp:          Utc::now(),
+            sender_cii: ContextualId::new("cii:attacker"),
+            expected_cii: ContextualId::new("cii:known-peer"),
+            timestamp: Utc::now(),
             replay_window_secs: 300,
         };
 
@@ -545,10 +548,10 @@ mod tests {
         let record = OperationRecord {
             operation_id: logging_tx.operation_id,
             message_type: "event_hash".into(),
-            peer_cii:    Some(ContextualId::new("cii:attacker")),
-            link_id:     None,
+            peer_cii: Some(ContextualId::new("cii:attacker")),
+            link_id: None,
             block_count: None,
-            outcome:     OperationOutcome::ValidationFailed("cii_mismatch".into()),
+            outcome: OperationOutcome::ValidationFailed("cii_mismatch".into()),
             duration_ms: 0,
         };
         let _idle = logging_tx.log_and_complete(record);
@@ -562,13 +565,16 @@ mod tests {
         let tx = SaTransaction::<Idle>::begin(audit).start_validation();
 
         let stale_ctx = ValidationContext {
-            sender_cii:         ContextualId::new("cii:peer"),
-            expected_cii:       ContextualId::new("cii:peer"),
-            timestamp:          Utc::now() - chrono::Duration::seconds(600),
+            sender_cii: ContextualId::new("cii:peer"),
+            expected_cii: ContextualId::new("cii:peer"),
+            timestamp: Utc::now() - chrono::Duration::seconds(600),
             replay_window_secs: 300,
         };
 
-        assert!(tx.validate(&stale_ctx).is_err(), "Stale timestamp must fail");
+        assert!(
+            tx.validate(&stale_ctx).is_err(),
+            "Stale timestamp must fail"
+        );
     }
 
     /// Network failure still reaches Logging — audit record is always written.
@@ -583,27 +589,24 @@ mod tests {
         let artifact = SaOutboundArtifact::FederationControl {
             control_type: FederationControlType::Terminate,
             from_cii: ContextualId::new("cii:local"),
-            to_cii:   ContextualId::new("cii:peer"),
-            link_id:  uuid::Uuid::new_v4(),
-            signature: crate::types::Ed25519Sig(
-                ed25519_dalek::Signature::from_bytes(&[0u8; 64])
-            ),
+            to_cii: ContextualId::new("cii:peer"),
+            link_id: uuid::Uuid::new_v4(),
+            signature: crate::types::Ed25519Sig(ed25519_dalek::Signature::from_bytes(&[0u8; 64])),
         };
 
         let transmitting = tx.compose(artifact);
-        let (logging_tx, outcome) = transmitting.record_transmission(
-            TransmitOutcome::NetworkFailure("connection refused".into())
-        );
+        let (logging_tx, outcome) = transmitting
+            .record_transmission(TransmitOutcome::NetworkFailure("connection refused".into()));
 
         assert!(matches!(outcome, TransmitOutcome::NetworkFailure(_)));
 
         let record = OperationRecord {
             operation_id: logging_tx.operation_id,
             message_type: "federation_control".into(),
-            peer_cii:    Some(ContextualId::new("cii:peer")),
-            link_id:     None,
+            peer_cii: Some(ContextualId::new("cii:peer")),
+            link_id: None,
             block_count: None,
-            outcome:     OperationOutcome::NetworkFailed("connection refused".into()),
+            outcome: OperationOutcome::NetworkFailed("connection refused".into()),
             duration_ms: 5,
         };
         let _idle = logging_tx.log_and_complete(record);

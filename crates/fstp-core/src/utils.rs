@@ -89,10 +89,7 @@ mod tests {
 
     #[test]
     fn cert_fingerprint_differs_for_different_input() {
-        assert_ne!(
-            cert_fingerprint(b"cert-a"),
-            cert_fingerprint(b"cert-b")
-        );
+        assert_ne!(cert_fingerprint(b"cert-a"), cert_fingerprint(b"cert-b"));
     }
 
     #[test]
@@ -104,7 +101,10 @@ mod tests {
 
     #[test]
     fn verify_cert_fingerprint_rejects_wrong() {
-        assert!(!verify_cert_fingerprint(b"cert-a", &cert_fingerprint(b"cert-b")));
+        assert!(!verify_cert_fingerprint(
+            b"cert-a",
+            &cert_fingerprint(b"cert-b")
+        ));
     }
 
     // CORRECCIÓN: Uso de try_seconds().unwrap() para cumplir con las especificaciones modernas de Chrono

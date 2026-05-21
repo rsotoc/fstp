@@ -49,10 +49,7 @@ impl FstpService for FstpGrpcServer {
 }
 
 /// Starts the local gRPC server (loopback integration with Ágora JVM).
-pub async fn serve_grpc(
-    addr: &str,
-    state: SharedState,
-) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn serve_grpc(addr: &str, state: SharedState) -> Result<(), Box<dyn std::error::Error>> {
     let socket_addr = addr.parse()?;
     let service = FstpGrpcServer::new(state);
 

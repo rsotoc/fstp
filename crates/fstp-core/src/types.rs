@@ -134,10 +134,7 @@ impl FederationEndpoint {
     }
 
     pub fn present_credential_url(&self) -> String {
-        format!(
-            "{}/fstp/present-credential",
-            self.url.trim_end_matches('/')
-        )
+        format!("{}/fstp/present-credential", self.url.trim_end_matches('/'))
     }
 }
 
@@ -225,7 +222,9 @@ pub enum FstpError {
     #[error("erasure already fulfilled for block: {0}")]
     ErasureAlreadyFulfilled(Sha256Hash),
 
-    #[error("TLS certificate fingerprint mismatch for peer {peer}: expected {expected}, got {actual}")]
+    #[error(
+        "TLS certificate fingerprint mismatch for peer {peer}: expected {expected}, got {actual}"
+    )]
     CertFingerprintMismatch {
         peer: String,
         expected: String,
@@ -236,22 +235,13 @@ pub enum FstpError {
     TlsError(String),
 
     #[error("sync request failed for link {link_id}: {reason}")]
-    SyncFailed {
-        link_id: LinkId,
-        reason: String,
-    },
+    SyncFailed { link_id: LinkId, reason: String },
 
     #[error("sync timed out after {secs}s for link {link_id}")]
-    SyncTimeout {
-        link_id: LinkId,
-        secs: u64,
-    },
+    SyncTimeout { link_id: LinkId, secs: u64 },
 
     #[error("HTTP error {status}: {body}")]
-    HttpError {
-        status: u16,
-        body: String,
-    },
+    HttpError { status: u16, body: String },
 
     #[error("serialization error: {0}")]
     SerializationError(#[from] serde_json::Error),
@@ -353,7 +343,7 @@ mod tests {
     fn federation_endpoint_builds_correct_urls() {
         let ep = FederationEndpoint::new("https://example.org", "aabbccdd");
         assert_eq!(ep.frontier_url(), "https://example.org/fstp/sync/frontier");
-        assert_eq!(ep.blocks_url(),   "https://example.org/fstp/sync/blocks");
+        assert_eq!(ep.blocks_url(), "https://example.org/fstp/sync/blocks");
     }
 
     #[test]

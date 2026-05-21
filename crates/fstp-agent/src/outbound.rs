@@ -105,22 +105,16 @@ pub async fn present_credential_to_peer(
         request = request.header("X-Pod-Agent-Key", key);
     }
 
-    let http_res = request
-        .send()
-        .await
-        .map_err(|e| FstpError::SyncFailed {
-            link_id,
-            reason: format!("present-credential HTTP: {e}"),
-        })?;
+    let http_res = request.send().await.map_err(|e| FstpError::SyncFailed {
+        link_id,
+        reason: format!("present-credential HTTP: {e}"),
+    })?;
 
     let status = http_res.status();
-    let body = http_res
-        .text()
-        .await
-        .map_err(|e| FstpError::SyncFailed {
-            link_id,
-            reason: e.to_string(),
-        })?;
+    let body = http_res.text().await.map_err(|e| FstpError::SyncFailed {
+        link_id,
+        reason: e.to_string(),
+    })?;
 
     if !status.is_success() {
         return Err(FstpError::HttpError {
@@ -129,12 +123,15 @@ pub async fn present_credential_to_peer(
         });
     }
 
-    let parsed: PresentCredentialResponse = serde_json::from_str(&body)
-        .map_err(FstpError::SerializationError)?;
+    let parsed: PresentCredentialResponse =
+        serde_json::from_str(&body).map_err(FstpError::SerializationError)?;
 
     let block_hash = serde_json::from_str::<serde_json::Value>(&body)
         .ok()
-        .and_then(|v| v.get("block_hash").and_then(|b| b.as_str().map(String::from)));
+        .and_then(|v| {
+            v.get("block_hash")
+                .and_then(|b| b.as_str().map(String::from))
+        });
 
     Ok(PresentCredentialOutcome {
         subject_cii: parsed.subject_cii,
@@ -165,10 +162,7 @@ pub fn build_http_client() -> Result<reqwest::Client> {
         std::env::var("FSTP_CERT_PATH"),
         std::env::var("FSTP_KEY_PATH"),
     ) {
-        if let (Ok(cert_pem), Ok(key_pem)) = (
-            std::fs::read(&cert_path),
-            std::fs::read(&key_path),
-        ) {
+        if let (Ok(cert_pem), Ok(key_pem)) = (std::fs::read(&cert_path), std::fs::read(&key_path)) {
             if let Ok(identity) = reqwest::Identity::from_pkcs8_pem(&cert_pem, &key_pem) {
                 builder = builder.identity(identity);
             } else {

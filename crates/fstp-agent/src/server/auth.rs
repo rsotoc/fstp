@@ -1,6 +1,7 @@
 //! Federation authentication (whitepaper §3.1, §2.2 threat model, §5 deployment).
 //! Peer routes: mTLS client certificate fingerprint; platform routes: `X-Pod-Agent-Key`.
 
+use super::{FederationEntry, SharedState};
 use axum::{
     extract::{Request, State},
     http::StatusCode,
@@ -8,11 +9,10 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
-use serde_json::json;
-use fstp_core::ContextualId;
 use fstp_core::types::RejectionReason;
 use fstp_core::utils::{cert_fingerprint, verify_cert_fingerprint};
-use super::{FederationEntry, SharedState};
+use fstp_core::ContextualId;
+use serde_json::json;
 
 /// Type inserted into request extensions to pass the client certificate.
 /// This decouples the auth middleware from third-party server primitives.
@@ -110,10 +110,7 @@ pub async fn auth_middleware(
     next.run(request).await
 }
 
-pub fn verify_sender_cii(
-    peer: &PeerIdentity,
-    sender_cii: &ContextualId,
-) -> Result<(), Response> {
+pub fn verify_sender_cii(peer: &PeerIdentity, sender_cii: &ContextualId) -> Result<(), Response> {
     if &peer.entry.peer_cii != sender_cii {
         return Err(auth_error(
             StatusCode::FORBIDDEN,
@@ -182,8 +179,8 @@ pub struct MockClientCert(pub Vec<u8>);
 mod tests {
     use super::*;
     use crate::server::{FederationEntry, ServerState};
-    use fstp_core::types::{ContextualId, FederationEndpoint, PublicKey};
     use fstp_core::crypto::NodeSigner;
+    use fstp_core::types::{ContextualId, FederationEndpoint, PublicKey};
     use fstp_core::utils::cert_fingerprint;
     use std::sync::Arc;
     use tokio::sync::RwLock;

@@ -41,11 +41,20 @@ fn three_node_eventual_consistency_and_integrity() {
 
     // ── 2. Concurrent local activity (divergence) ─────────────────────────
     let block_a1 = bl_a
-        .append(test_payload(b"Decision from Island A", EventClass::Decision), mock_sig())
+        .append(
+            test_payload(b"Decision from Island A", EventClass::Decision),
+            mock_sig(),
+        )
         .unwrap();
 
     let block_b1 = bl_b
-        .append(test_payload(b"Membership change at Island B", EventClass::MembershipChange), mock_sig())
+        .append(
+            test_payload(
+                b"Membership change at Island B",
+                EventClass::MembershipChange,
+            ),
+            mock_sig(),
+        )
         .unwrap();
 
     // At this point: A=[a1], B=[b1], C=[]
@@ -74,9 +83,21 @@ fn three_node_eventual_consistency_and_integrity() {
     let report_b = bl_b.verify_chain();
     let report_c = bl_c.verify_chain();
 
-    assert!(report_a.valid, "Island A chain corrupt: {:?}", report_a.corrupted_blocks);
-    assert!(report_b.valid, "Island B chain corrupt: {:?}", report_b.corrupted_blocks);
-    assert!(report_c.valid, "Island C chain corrupt: {:?}", report_c.corrupted_blocks);
+    assert!(
+        report_a.valid,
+        "Island A chain corrupt: {:?}",
+        report_a.corrupted_blocks
+    );
+    assert!(
+        report_b.valid,
+        "Island B chain corrupt: {:?}",
+        report_b.corrupted_blocks
+    );
+    assert!(
+        report_c.valid,
+        "Island C chain corrupt: {:?}",
+        report_c.corrupted_blocks
+    );
 
     // ── 6. Eventual consistency: all nodes hold the same blocks ──────────
     assert_eq!(report_a.total_blocks, 2, "Island A: unexpected block count");
@@ -152,12 +173,13 @@ fn bilateral_authentication_with_real_signatures() {
 
     let signer_a = NodeSigner::generate();
     let signer_b = NodeSigner::generate();
-    let cii_a    = ContextualId::new("cii:island-a");
-    let cii_b    = ContextualId::new("cii:island-b");
+    let cii_a = ContextualId::new("cii:island-a");
+    let cii_b = ContextualId::new("cii:island-b");
     let link_id: LinkId = Uuid::new_v4();
 
     let mut bl_a = InMemoryBlocklace::new();
-    bl_a.append(test_payload(b"event-1", EventClass::Decision), mock_sig()).unwrap();
+    bl_a.append(test_payload(b"event-1", EventClass::Decision), mock_sig())
+        .unwrap();
     let frontier_a = bl_a.frontier();
     let ts = fstp_core::utils::now_utc();
 
@@ -165,19 +187,43 @@ fn bilateral_authentication_with_real_signatures() {
 
     // B verifies A's response using A's registered public key
     assert!(
-        verify_response_signature(&cii_a, &link_id, &frontier_a, &ts, &sig_a, &signer_a.public_key()).is_ok(),
+        verify_response_signature(
+            &cii_a,
+            &link_id,
+            &frontier_a,
+            &ts,
+            &sig_a,
+            &signer_a.public_key()
+        )
+        .is_ok(),
         "Valid signature must verify"
     );
 
     // Tampered CII must be rejected
     assert!(
-        verify_response_signature(&cii_b, &link_id, &frontier_a, &ts, &sig_a, &signer_a.public_key()).is_err(),
+        verify_response_signature(
+            &cii_b,
+            &link_id,
+            &frontier_a,
+            &ts,
+            &sig_a,
+            &signer_a.public_key()
+        )
+        .is_err(),
         "Tampered CII must not verify"
     );
 
     // Wrong key must be rejected
     assert!(
-        verify_response_signature(&cii_a, &link_id, &frontier_a, &ts, &sig_a, &signer_b.public_key()).is_err(),
+        verify_response_signature(
+            &cii_a,
+            &link_id,
+            &frontier_a,
+            &ts,
+            &sig_a,
+            &signer_b.public_key()
+        )
+        .is_err(),
         "Signature from A must not verify under B's key"
     );
 }
@@ -192,17 +238,35 @@ fn erasure_preserves_chain_integrity() {
 
     let mut bl = InMemoryBlocklace::new();
 
-    let personal_payload = test_payload(b"personal data subject to GDPR Art.17", EventClass::MembershipChange);
+    let personal_payload = test_payload(
+        b"personal data subject to GDPR Art.17",
+        EventClass::MembershipChange,
+    );
     let event_hash = personal_payload.event_hash.clone();
 
     bl.append(personal_payload, mock_sig()).unwrap();
-    bl.append(test_payload(b"subsequent governance event", EventClass::Decision), mock_sig()).unwrap();
+    bl.append(
+        test_payload(b"subsequent governance event", EventClass::Decision),
+        mock_sig(),
+    )
+    .unwrap();
 
     // Fulfill erasure request — content deleted, block becomes a dangling pointer
-    bl.fulfill_erasure(event_hash, ErasureReason::DataSubjectRequest).unwrap();
+    bl.fulfill_erasure(event_hash, ErasureReason::DataSubjectRequest)
+        .unwrap();
 
     let report = bl.verify_chain();
-    assert!(report.valid, "Chain must remain valid after erasure: {:?}", report.corrupted_blocks);
-    assert_eq!(report.dangling_pointers, 1, "Exactly one dangling pointer expected");
-    assert_eq!(report.total_blocks, 2, "Block count unchanged — pointer persists");
+    assert!(
+        report.valid,
+        "Chain must remain valid after erasure: {:?}",
+        report.corrupted_blocks
+    );
+    assert_eq!(
+        report.dangling_pointers, 1,
+        "Exactly one dangling pointer expected"
+    );
+    assert_eq!(
+        report.total_blocks, 2,
+        "Block count unchanged — pointer persists"
+    );
 }

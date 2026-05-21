@@ -21,8 +21,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::types::{ContextualId, Ed25519Sig, FederationEndpoint, PublicKey, Sha256Hash};
 pub(crate) use crate::blocklace::AggregateAttrs;
+use crate::types::{ContextualId, Ed25519Sig, FederationEndpoint, PublicKey, Sha256Hash};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Discriminant enums
@@ -128,18 +128,18 @@ pub enum FstpMessage {
 impl FstpMessage {
     pub fn type_name(&self) -> &'static str {
         match self {
-            FstpMessage::IdentityEvent { .. }        => "identity_event",
-            FstpMessage::EventHash { .. }            => "event_hash",
+            FstpMessage::IdentityEvent { .. } => "identity_event",
+            FstpMessage::EventHash { .. } => "event_hash",
             FstpMessage::VerifiableCredential { .. } => "verifiable_credential",
-            FstpMessage::FederationControl { .. }    => "federation_control",
+            FstpMessage::FederationControl { .. } => "federation_control",
         }
     }
 
     pub fn emitter_cii(&self) -> Option<&ContextualId> {
         match self {
             FstpMessage::IdentityEvent { instance_cii, .. } => Some(instance_cii),
-            FstpMessage::EventHash { instance_cii, .. }     => Some(instance_cii),
-            FstpMessage::VerifiableCredential { .. }        => None,
+            FstpMessage::EventHash { instance_cii, .. } => Some(instance_cii),
+            FstpMessage::VerifiableCredential { .. } => None,
             FstpMessage::FederationControl { from_cii, .. } => Some(from_cii),
         }
     }
@@ -163,7 +163,7 @@ mod tests {
             event: IdentityEventKind::CiiAnnouncement,
             instance_cii: ContextualId::new("cii:test"),
             pubkey: PublicKey(
-                ed25519_dalek::SigningKey::generate(&mut rand::rngs::OsRng).verifying_key()
+                ed25519_dalek::SigningKey::generate(&mut rand::rngs::OsRng).verifying_key(),
             ),
             endpoint: FederationEndpoint::new("https://node.example.org", "aabb"),
             timestamp: chrono::Utc::now(),
@@ -193,9 +193,20 @@ mod tests {
     #[test]
     fn no_raw_field_names_in_serialized_message() {
         let forbidden = [
-            "content", "text", "body", "name", "email", "phone",
-            "address", "vote", "member_data", "document",
-            "private_key", "secret", "gii", "global_id",
+            "content",
+            "text",
+            "body",
+            "name",
+            "email",
+            "phone",
+            "address",
+            "vote",
+            "member_data",
+            "document",
+            "private_key",
+            "secret",
+            "gii",
+            "global_id",
         ];
         let json = serde_json::to_string(&dummy_identity_event())
             .unwrap()

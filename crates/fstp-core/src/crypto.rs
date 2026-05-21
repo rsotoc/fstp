@@ -127,12 +127,8 @@ impl NodeSigner {
         responder_frontier: &[Sha256Hash],
         timestamp: &DateTime<Utc>,
     ) -> Ed25519Sig {
-        let bytes = frontier_response_signable(
-            responder_cii,
-            link_id,
-            responder_frontier,
-            timestamp,
-        );
+        let bytes =
+            frontier_response_signable(responder_cii, link_id, responder_frontier, timestamp);
         Ed25519Sig(self.signing_key.sign(&bytes))
     }
 
@@ -144,12 +140,7 @@ impl NodeSigner {
         sender_frontier: &[Sha256Hash],
         timestamp: &DateTime<Utc>,
     ) -> Ed25519Sig {
-        let bytes = frontier_request_signable(
-            sender_cii,
-            link_id,
-            sender_frontier,
-            timestamp,
-        );
+        let bytes = frontier_request_signable(sender_cii, link_id, sender_frontier, timestamp);
         Ed25519Sig(self.signing_key.sign(&bytes))
     }
 
@@ -179,19 +170,16 @@ pub fn verify_response_signature(
     signature: &Ed25519Sig,
     responder_pubkey: &PublicKey,
 ) -> Result<()> {
-    let bytes = frontier_response_signable(
-        responder_cii,
-        link_id,
-        responder_frontier,
-        timestamp,
-    );
+    let bytes = frontier_response_signable(responder_cii, link_id, responder_frontier, timestamp);
 
     responder_pubkey
         .0
         .verify(&bytes, &signature.0)
-        .map_err(|e| FstpError::CryptoError(format!(
-            "FrontierResponse signature verification failed: {e}"
-        )))
+        .map_err(|e| {
+            FstpError::CryptoError(format!(
+                "FrontierResponse signature verification failed: {e}"
+            ))
+        })
 }
 
 /// Verify the signature on a received `FrontierRequest`.
@@ -204,12 +192,11 @@ pub fn verify_request_signature(
     sender_pubkey: &PublicKey,
 ) -> Result<()> {
     let bytes = frontier_request_signable(sender_cii, link_id, sender_frontier, timestamp);
-    sender_pubkey
-        .0
-        .verify(&bytes, &signature.0)
-        .map_err(|e| FstpError::CryptoError(format!(
+    sender_pubkey.0.verify(&bytes, &signature.0).map_err(|e| {
+        FstpError::CryptoError(format!(
             "FrontierRequest signature verification failed: {e}"
-        )))
+        ))
+    })
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -239,10 +226,15 @@ mod tests {
         let signer = NodeSigner::generate();
         let (cii, link_id, frontier, ts) = sample_params();
         let sig = signer.sign_request(&cii, &link_id, &frontier, &ts);
-        assert!(
-            verify_request_signature(&cii, &link_id, &frontier, &ts, &sig, &signer.public_key())
-                .is_ok()
-        );
+        assert!(verify_request_signature(
+            &cii,
+            &link_id,
+            &frontier,
+            &ts,
+            &sig,
+            &signer.public_key()
+        )
+        .is_ok());
     }
 
     #[test]
@@ -268,7 +260,8 @@ mod tests {
 
         let tampered_cii = ContextualId::new("cii:attacker");
         assert!(
-            verify_response_signature(&tampered_cii, &link_id, &frontier, &ts, &sig, &pubkey).is_err(),
+            verify_response_signature(&tampered_cii, &link_id, &frontier, &ts, &sig, &pubkey)
+                .is_err(),
             "Tampered CII must not verify"
         );
     }

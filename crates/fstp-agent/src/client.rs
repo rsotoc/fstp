@@ -1,14 +1,14 @@
 //! Federation Sync Client.
 //! Initiates the active Frontier Exchange and Block Push protocols (Definition 3.1).
 
-use chrono::Utc;
-use fstp_core::types::{
-    ContextualId, FederationEndpoint, FrontierRequest,
-    FrontierResponse, FstpError, LinkId, Result, SyncOutcome, SyncResult
-};
-use fstp_core::blocklace::{BlocklaceStore, Block};
 use crate::server::SharedState;
+use chrono::Utc;
+use fstp_core::blocklace::{Block, BlocklaceStore};
 use fstp_core::crypto::verify_response_signature;
+use fstp_core::types::{
+    ContextualId, FederationEndpoint, FrontierRequest, FrontierResponse, FstpError, LinkId, Result,
+    SyncOutcome, SyncResult,
+};
 
 pub struct FstpClient {
     /// Cliente HTTP asíncrono reutilizable para el ciclo de vida de la red
@@ -50,12 +50,9 @@ impl FstpClient {
         let timestamp = Utc::now();
         let signature = {
             let state_read = state.read().await;
-            state_read.signer.sign_request(
-                &own_cii,
-                &link_id,
-                &local_frontier,
-                &timestamp,
-            )
+            state_read
+                .signer
+                .sign_request(&own_cii, &link_id, &local_frontier, &timestamp)
         };
 
         let request_payload = FrontierRequest {
@@ -69,12 +66,16 @@ impl FstpClient {
         // ── PASO 2: Disparar el Intercambio de Fronteras (HTTP POST) ──
         tracing::info!(peer_url = %peer_endpoint.frontier_url(), "SA Client: Iniciando intercambio de fronteras");
 
-        let http_response = self.http_client
+        let http_response = self
+            .http_client
             .post(peer_endpoint.frontier_url())
             .json(&request_payload)
             .send()
             .await
-            .map_err(|e| FstpError::SyncFailed { link_id, reason: e.to_string() })?;
+            .map_err(|e| FstpError::SyncFailed {
+                link_id,
+                reason: e.to_string(),
+            })?;
 
         if !http_response.status().is_success() {
             return Err(FstpError::HttpError {
@@ -86,10 +87,13 @@ impl FstpClient {
         let response_text = http_response
             .text()
             .await
-            .map_err(|e| FstpError::SyncFailed { link_id, reason: e.to_string() })?;
+            .map_err(|e| FstpError::SyncFailed {
+                link_id,
+                reason: e.to_string(),
+            })?;
 
-        let response_payload: FrontierResponse = serde_json::from_str(&response_text)
-            .map_err(FstpError::SerializationError)?;
+        let response_payload: FrontierResponse =
+            serde_json::from_str(&response_text).map_err(FstpError::SerializationError)?;
 
         let blocks_received_count = response_payload.missing_blocks.len();
 
@@ -99,7 +103,8 @@ impl FstpClient {
         // response itself — that would be trivially forgeable).
         {
             let state_read = state.read().await;
-            let peer_entry = state_read.federation
+            let peer_entry = state_read
+                .federation
                 .values()
                 .find(|e| e.link_id == link_id)
                 .ok_or_else(|| FstpError::SyncFailed {
@@ -114,7 +119,8 @@ impl FstpClient {
                 &response_payload.timestamp,
                 &response_payload.signature,
                 &peer_entry.peer_pubkey,
-            ).map_err(|e| FstpError::SyncFailed {
+            )
+            .map_err(|e| FstpError::SyncFailed {
                 link_id,
                 reason: format!("FrontierResponse signature invalid: {e}"),
             })?;
@@ -125,8 +131,13 @@ impl FstpClient {
         // ── PASO 4: Fusionar los bloques recibidos en nuestro Grafo local ──
         if !response_payload.missing_blocks.is_empty() {
             let mut state_write = state.write().await;
-            state_write.blocklace.merge_blocks(response_payload.missing_blocks)?;
-            tracing::info!(count = blocks_received_count, "SA Client: Bloques remotos integrados con éxito");
+            state_write
+                .blocklace
+                .merge_blocks(response_payload.missing_blocks)?;
+            tracing::info!(
+                count = blocks_received_count,
+                "SA Client: Bloques remotos integrados con éxito"
+            );
         }
 
         // ── PASO 5: Calcular y Empujar nuestro Delta hacia el par (Block Push) ──
@@ -135,7 +146,9 @@ impl FstpClient {
         // This requires a fresh read lock acquired after the merge above.
         let blocks_to_push: Vec<Block> = {
             let state_read = state.read().await;
-            state_read.blocklace.sync_delta(&response_payload.responder_frontier)
+            state_read
+                .blocklace
+                .sync_delta(&response_payload.responder_frontier)
         };
 
         let blocks_sent_count = blocks_to_push.len();
@@ -143,12 +156,16 @@ impl FstpClient {
         if !blocks_to_push.is_empty() {
             tracing::info!(peer_url = %peer_endpoint.blocks_url(), count = blocks_sent_count, "SA Client: Empujando delta de bloques");
 
-            let push_response = self.http_client
+            let push_response = self
+                .http_client
                 .post(peer_endpoint.blocks_url())
                 .json(&blocks_to_push)
                 .send()
                 .await
-                .map_err(|e| FstpError::SyncFailed { link_id, reason: e.to_string() })?;
+                .map_err(|e| FstpError::SyncFailed {
+                    link_id,
+                    reason: e.to_string(),
+                })?;
 
             if !push_response.status().is_success() {
                 return Err(FstpError::HttpError {

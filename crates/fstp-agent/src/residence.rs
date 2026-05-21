@@ -7,7 +7,7 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
-use fstp_core::blocklace::{AggregateAttrs, BlocklaceStore, BlockPayload};
+use fstp_core::blocklace::{AggregateAttrs, BlockPayload, BlocklaceStore};
 use fstp_core::identity::FederationContext;
 use fstp_core::message::EventClass;
 use fstp_core::types::{Ed25519Sig, FederationEndpoint, Sha256Hash};
@@ -91,7 +91,9 @@ pub async fn grant_residence_handler(
             "hasCredential": req.credential_json.is_some(),
         });
         let event_hash = Sha256Hash::digest(signable.to_string().as_bytes());
-        let sig = state_write.signer.sign_bytes(signable.to_string().as_bytes());
+        let sig = state_write
+            .signer
+            .sign_bytes(signable.to_string().as_bytes());
         let payload = BlockPayload {
             event_hash: event_hash.clone(),
             event_class: EventClass::MembershipChange,
@@ -142,7 +144,9 @@ pub async fn revoke_residence_handler(
     });
     let event_hash = Sha256Hash::digest(signable.to_string().as_bytes());
     let mut state_write = state.write().await;
-    let sig: Ed25519Sig = state_write.signer.sign_bytes(signable.to_string().as_bytes());
+    let sig: Ed25519Sig = state_write
+        .signer
+        .sign_bytes(signable.to_string().as_bytes());
     let payload = BlockPayload {
         event_hash: event_hash.clone(),
         event_class: EventClass::MembershipChange,

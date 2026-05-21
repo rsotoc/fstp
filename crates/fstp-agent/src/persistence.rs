@@ -16,8 +16,8 @@
 //! At shutdown (or periodically):
 //!   `flush(&bl, path)?;`
 
-use std::path::{Path, PathBuf};
 use std::fs;
+use std::path::{Path, PathBuf};
 
 use fstp_core::blocklace::{Block, BlocklaceStore, InMemoryBlocklace};
 use fstp_core::types::{FstpError, Result};
@@ -25,8 +25,8 @@ use fstp_core::types::{FstpError, Result};
 /// Persisted snapshot of an `InMemoryBlocklace`.
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 struct BlocklaceSnapshot {
-    version:  u32,
-    blocks:   Vec<Block>,
+    version: u32,
+    blocks: Vec<Block>,
 }
 
 /// Load a Blocklace from `path`, or return a fresh empty one if the file
@@ -46,7 +46,8 @@ pub fn load_or_new(path: &Path) -> Result<InMemoryBlocklace> {
     if snapshot.version != 1 {
         return Err(FstpError::PersistenceError(format!(
             "unsupported snapshot version {} in {}",
-            snapshot.version, path.display()
+            snapshot.version,
+            path.display()
         )));
     }
 
@@ -85,7 +86,7 @@ pub fn flush(bl: &InMemoryBlocklace, path: &Path) -> Result<()> {
 
     let snapshot = BlocklaceSnapshot {
         version: 1,
-        blocks:  all_blocks,
+        blocks: all_blocks,
     };
 
     let json = serde_json::to_vec_pretty(&snapshot)
@@ -93,8 +94,9 @@ pub fn flush(bl: &InMemoryBlocklace, path: &Path) -> Result<()> {
 
     // Write to a temp file, then atomically rename
     let tmp_path = path.with_extension("tmp");
-    fs::write(&tmp_path, &json)
-        .map_err(|e| FstpError::PersistenceError(format!("write tmp {}: {e}", tmp_path.display())))?;
+    fs::write(&tmp_path, &json).map_err(|e| {
+        FstpError::PersistenceError(format!("write tmp {}: {e}", tmp_path.display()))
+    })?;
 
     fs::rename(&tmp_path, path)
         .map_err(|e| FstpError::PersistenceError(format!("rename to {}: {e}", path.display())))?;

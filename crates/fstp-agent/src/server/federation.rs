@@ -24,15 +24,8 @@ use fstp_core::audit::AuditLog;
 use fstp_core::blocklace::InMemoryBlocklace;
 use fstp_core::crypto::NodeSigner;
 use fstp_core::identity::GlobalInstanceId;
+use fstp_core::types::{ContextualId, FederationEndpoint, FstpError, LinkId, PublicKey, Result};
 use fstp_core::IssuerRegistry;
-use fstp_core::types::{
-    ContextualId,
-    FederationEndpoint,
-    FstpError,
-    LinkId,
-    PublicKey,
-    Result,
-};
 
 use super::handlers;
 use super::integration;
@@ -142,10 +135,7 @@ impl ServerState {
         self.federation.get(fp)
     }
 
-    pub fn peer_by_fingerprint(
-        &self,
-        fingerprint: &str,
-    ) -> Option<&FederationEntry> {
+    pub fn peer_by_fingerprint(&self, fingerprint: &str) -> Option<&FederationEntry> {
         self.federation.get(fingerprint)
     }
 }
@@ -155,18 +145,9 @@ pub type SharedState = Arc<RwLock<ServerState>>;
 /// Builds the Axum router with all federation endpoints and middleware.
 pub fn build_router(state: SharedState) -> Router {
     Router::new()
-        .route(
-            "/fstp/sync/frontier",
-            post(handlers::frontier_handler),
-        )
-        .route(
-            "/fstp/sync/blocks",
-            post(handlers::blocks_handler),
-        )
-        .route(
-            "/fstp/health",
-            get(handlers::health_handler),
-        )
+        .route("/fstp/sync/frontier", post(handlers::frontier_handler))
+        .route("/fstp/sync/blocks", post(handlers::blocks_handler))
+        .route("/fstp/health", get(handlers::health_handler))
         .route(
             "/fstp/present-credential",
             post(handlers::present_credential_handler),
@@ -175,10 +156,7 @@ pub fn build_router(state: SharedState) -> Router {
             "/fstp/federation/control",
             post(handlers::federation_control_handler),
         )
-        .route(
-            "/fstp/admin/peers",
-            post(handlers::register_peer_handler),
-        )
+        .route("/fstp/admin/peers", post(handlers::register_peer_handler))
         .route(
             "/rpc/verify-credential",
             post(handlers::verify_credential_http_handler),
@@ -195,10 +173,7 @@ pub fn build_router(state: SharedState) -> Router {
             "/pod-agent/v1/residences/revoke",
             post(crate::residence::revoke_residence_handler),
         )
-        .route(
-            "/fstp/admin/sync",
-            post(integration::admin_sync_handler),
-        )
+        .route("/fstp/admin/sync", post(integration::admin_sync_handler))
         .route(
             "/fstp/admin/blocklace/status",
             get(super::blocklace_admin::blocklace_status_handler),
@@ -218,49 +193,29 @@ pub struct TlsParams {
     pub key_pem_path: PathBuf,
 }
 
-pub async fn load_tls_config(
-    params: &TlsParams,
-) -> Result<RustlsConfig> {
-    RustlsConfig::from_pem_file(
-        &params.cert_pem_path,
-        &params.key_pem_path,
-    )
+pub async fn load_tls_config(params: &TlsParams) -> Result<RustlsConfig> {
+    RustlsConfig::from_pem_file(&params.cert_pem_path, &params.key_pem_path)
         .await
         .map_err(|e| FstpError::TlsError(e.to_string()))
 }
 
 /// Launches the HTTPS federation server.
-pub async fn serve(
-    addr: &str,
-    state: SharedState,
-    tls: TlsParams,
-) -> Result<()> {
+pub async fn serve(addr: &str, state: SharedState, tls: TlsParams) -> Result<()> {
     let tls_config = load_tls_config(&tls).await?;
 
-    let router = build_router(state.clone())
-        .layer(
-            axum::middleware::from_fn_with_state(
-                state,
-                crate::server::auth::auth_middleware,
-            ),
-        );
+    let router = build_router(state.clone()).layer(axum::middleware::from_fn_with_state(
+        state,
+        crate::server::auth::auth_middleware,
+    ));
 
     let addr: SocketAddr = addr
         .parse()
-        .map_err(|e| {
-            FstpError::TlsError(format!(
-                "invalid bind address: {e}"
-            ))
-        })?;
+        .map_err(|e| FstpError::TlsError(format!("invalid bind address: {e}")))?;
 
-    tracing::info!(
-        "FSTP federation server listening on {addr}"
-    );
+    tracing::info!("FSTP federation server listening on {addr}");
 
     axum_server::bind_rustls(addr, tls_config)
-        .serve(
-            router.into_make_service_with_connect_info::<SocketAddr>()
-        )
+        .serve(router.into_make_service_with_connect_info::<SocketAddr>())
         .await
         .map_err(|e| FstpError::TlsError(e.to_string()))
 }

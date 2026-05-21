@@ -77,14 +77,8 @@ pub async fn present_passport_handler(
                     contract_version: CONTRACT_VERSION,
                 });
             }
-            let link_id = link_id_from_pair(
-                &state_read.node_did.0,
-                &target_did,
-            );
-            (
-                link_id,
-                FederationEndpoint::new(url.trim(), "dev-insecure"),
-            )
+            let link_id = link_id_from_pair(&state_read.node_did.0, &target_did);
+            (link_id, FederationEndpoint::new(url.trim(), "dev-insecure"))
         } else {
             return platform_json(PresentPassportPlatformResponse {
                 accepted: false,
@@ -104,10 +98,7 @@ pub async fn present_passport_handler(
         )
     };
 
-    let subject_id = format!(
-        "{}:{}",
-        req.source_subject_cii, req.citizen_id
-    );
+    let subject_id = format!("{}:{}", req.source_subject_cii, req.citizen_id);
 
     let http = match build_http_client() {
         Ok(c) => c,
