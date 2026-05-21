@@ -24,6 +24,11 @@ impl Sha256Hash {
         Self(hasher.finalize().into())
     }
 
+    /// Construct from a raw 32-byte digest (e.g. domain EventHash from Ágora).
+    pub fn from_bytes(bytes: [u8; 32]) -> Self {
+        Self(bytes)
+    }
+
     pub fn as_bytes(&self) -> &[u8; 32] {
         &self.0
     }

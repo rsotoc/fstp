@@ -7,6 +7,7 @@ mod auth;
 mod handlers;
 mod integration;
 mod verify_credential;
+pub mod blocklace_admin;
 
 // 2. Re-exportaciones Modernas e Idiomáticas
 pub use federation::{serve, FederationEntry, ServerState, SharedState, TlsParams};

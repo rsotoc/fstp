@@ -71,11 +71,11 @@ cargo bench -p fstp-core
 
 ```bash
 cp .env.example .env
-# Set FSTP_NODE_IKM (32+ bytes secret), FSTP_NODE_DID, TLS paths, etc.
+./scripts/gen-dev-certs.sh   # once — creates certs/server.crt + server.key (gitignored)
 cargo run -p fstp-agent
 ```
 
-Generate dev TLS material under `certs/` locally (`certs/` is gitignored). See [`.env.example`](.env.example) for all variables.
+`certs/` is gitignored. For production PKI see [`docs/MTLS-PRODUCTION.md`](docs/MTLS-PRODUCTION.md).
 
 ### Register a federation peer
 
