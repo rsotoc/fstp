@@ -36,12 +36,24 @@ Recomendación producción:
 
 - Red privada o service mesh mTLS **además** de la clave.
 - Rotar `FSTP_POD_AGENT_KEY` / `POD_AGENT_API_KEY` por entorno.
-- Java: configurar `RestClient` con trust store del SA y certificado cliente de Ágora (pendiente en `PodAgentRestClientFactory` — hoy `SimpleClientHttpRequestFactory` sin mTLS).
+- Java (P5): perfil `fstp-production` + `PodAgentHttpClientSupport` con:
+  - `agora.pod-agent.tls.trust-store-path` / `AGORA_POD_AGENT_TRUST_STORE`
+  - `agora.pod-agent.tls.key-store-path` / `AGORA_POD_AGENT_KEY_STORE` (mTLS cliente opcional)
+  - `PodAgentTlsProductionValidator` aborta si `insecure-skip-verify=true` o HTTPS sin trust store.
 
 ### 3. Verify-credential (HU-03)
 
 - `POST /rpc/verify-credential` **sin** mTLS de peer; expuesto solo en red de confianza.
 - En producción: bind `FSTP_GRPC_ADDR` loopback; HTTP proxy solo desde Ágora.
+
+### 4. Liveness / health
+
+| Ruta | Auth en `FSTP_PROFILE=production` |
+|------|-----------------------------------|
+| `GET /fstp/admin/blocklace/status` | `X-Pod-Agent-Key` (ruta plataforma) — usar en probes/smoke |
+| `GET /fstp/health` | Certificado cliente mTLS registrado en `POST /fstp/admin/peers` |
+
+Un `curl` solo con `--cacert` a `/fstp/health` devuelve **401** (comportamiento esperado).
 
 ---
 

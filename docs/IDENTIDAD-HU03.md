@@ -67,11 +67,18 @@ sequenceDiagram
 | Rechazo si Pod es `agora-common` | ✅ | `ExternalPodCredentialVerifier` |
 | Emisor VC coincide con `pod_directory.external_did` | ✅ | `ExternalPodCredentialVerifier` |
 | Verificación firma / expiración VC | ✅ | `VerifiableCredentialService` |
-| Verificación adicional vía SA cuando producción | 🟡 | `PassportService.notifyAgentVerifyOptional` — **obligatoria** si `agora.pod-agent.outbound-enabled=true` (ver cambio en `ExternalPodCredentialVerifier`) |
+| Verificación adicional vía SA cuando producción | 🟡 | `ExternalPodCredentialVerifier` → `POST {SA}/rpc/verify-credential` vía `PodAgentRestClientFactory.createForAgentRoot()` (perfil `fstp-staging`) |
 | Listar y unirse a grupos Common compatibles | ✅ | `listAccessibleCommonCommunities`, explore + join |
 | Registro accountability | ✅ | `CredentialPresentationLogService.recordPassportActivation` |
 | mTLS Ágora ↔ SA en producción | 🔴 → doc | [`MTLS-PRODUCTION.md`](./MTLS-PRODUCTION.md) |
 | Emisor Pod en `FSTP_TRUSTED_ISSUERS_JSON` del SA Common | 🟡 | Operación: registrar DID + pubkey del Pod emisor |
+
+---
+
+## DID emisor real (`did:key`)
+
+Tutorial paso a paso: [`docs/tutorials/TUTORIAL-DID-KEY-REAL.md`](../../docs/tutorials/TUTORIAL-DID-KEY-REAL.md)  
+Atajo local: `cd sos-backend && ./gradlew generatePodDemoDid -PpodKey=pod-demo-alpha`
 
 ---
 

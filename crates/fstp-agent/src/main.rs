@@ -11,6 +11,8 @@ mod residence;
 mod server;
 mod sync_scheduler;
 
+use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use uuid::Uuid;
@@ -20,6 +22,65 @@ use fstp_core::crypto::NodeSigner;
 use fstp_core::identity::{FederationContext, GlobalInstanceId};
 use fstp_core::types::{Did, FederationEndpoint};
 
+/// Fails fast when another process (often a stale fstp-agent) already owns the port.
+async fn preflight_listen_addr(addr: &str, env_name: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let socket: SocketAddr = addr
+        .parse()
+        .map_err(|e| format!("invalid {env_name} '{addr}': {e}"))?;
+    tokio::net::TcpListener::bind(socket)
+        .await
+        .map_err(|e| {
+            if e.kind() == std::io::ErrorKind::AddrInUse {
+                format!(
+                    "{env_name} {addr} already in use — stop the other fstp-agent (lsof -i :{}) or change the port",
+                    socket.port()
+                )
+            } else {
+                format!("{env_name} {addr} bind failed: {e}")
+            }
+        })?;
+    Ok(())
+}
+
+/// Loads optional `.env` from cwd or monorepo `fstp/.env` (skipped when FSTP_SKIP_DOTENV=1).
+fn load_dotenv_files() -> Option<&'static str> {
+    if std::env::var("FSTP_SKIP_DOTENV").is_ok() {
+        return None;
+    }
+    for path in [".env", "fstp/.env"] {
+        if !std::path::Path::new(path).exists() {
+            continue;
+        }
+        match dotenvy::from_filename(path) {
+            Ok(_) => {
+                tracing::info!(path, "Loaded environment from .env file");
+                return Some(path);
+            }
+            Err(e) => tracing::warn!(path, error = %e, "Failed to parse .env file"),
+        }
+    }
+    None
+}
+
+fn warn_if_trusted_issuers_commented_in_dotenv(env_path: &str) {
+    let Ok(content) = std::fs::read_to_string(env_path) else {
+        return;
+    };
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with('#')
+            && trimmed.contains("FSTP_TRUSTED_ISSUERS_JSON")
+            && trimmed.contains("did:key:")
+        {
+            tracing::warn!(
+                path = env_path,
+                "FSTP_TRUSTED_ISSUERS_JSON is commented out in .env — remove the leading # and use single quotes around the JSON"
+            );
+            return;
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 1. Inicializar el sistema de logs (tracing)
@@ -28,6 +89,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .init();
 
     tracing::info!("Initializing FSTP Federated Sync Agent...");
+
+    let _ = rustls::crypto::ring::default_provider().install_default();
+
+    let loaded_dotenv = load_dotenv_files();
 
     production::enforce_production_profile();
 
@@ -109,26 +174,58 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .issuer_registry
         .register(node_did.clone(), server_state.signer.public_key());
 
-    // Optional: FSTP_TRUSTED_ISSUERS_JSON=[{"did":"did:key:…","pubkeyHex":"…64 hex…"}]
+    // Optional: FSTP_TRUSTED_ISSUERS_JSON=[{"did":"did:key:…","pubkeyHex":"…64 hex…"}] (camelCase or pubkey_hex)
     if let Ok(json) = std::env::var("FSTP_TRUSTED_ISSUERS_JSON") {
         #[derive(serde::Deserialize)]
+        #[serde(rename_all = "camelCase")]
         struct TrustedIssuer {
             did: String,
+            #[serde(alias = "pubkey_hex")]
             pubkey_hex: String,
         }
-        if let Ok(list) = serde_json::from_str::<Vec<TrustedIssuer>>(&json) {
-            for entry in list {
-                if let Ok(bytes) = hex::decode(entry.pubkey_hex.trim()) {
-                    if let Ok(arr) = <[u8; 32]>::try_from(bytes.as_slice()) {
-                        if let Ok(vk) = ed25519_dalek::VerifyingKey::from_bytes(&arr) {
-                            server_state
-                                .issuer_registry
-                                .register(Did::new(&entry.did), fstp_core::types::PublicKey(vk));
+        match serde_json::from_str::<Vec<TrustedIssuer>>(&json) {
+            Ok(list) => {
+                let mut loaded = 0u32;
+                for entry in list {
+                    if let Ok(bytes) = hex::decode(entry.pubkey_hex.trim()) {
+                        if let Ok(arr) = <[u8; 32]>::try_from(bytes.as_slice()) {
+                            if let Ok(vk) = ed25519_dalek::VerifyingKey::from_bytes(&arr) {
+                                server_state.issuer_registry.register(
+                                    Did::new(&entry.did),
+                                    fstp_core::types::PublicKey(vk),
+                                );
+                                loaded += 1;
+                                tracing::info!(did = %entry.did, "trusted issuer loaded from FSTP_TRUSTED_ISSUERS_JSON");
+                            }
                         }
                     }
                 }
+                if loaded == 0 {
+                    tracing::warn!(
+                        "FSTP_TRUSTED_ISSUERS_JSON parsed but no issuer registered — check 64-char pubkeyHex"
+                    );
+                } else {
+                    tracing::info!(count = loaded, "FSTP_TRUSTED_ISSUERS_JSON applied");
+                }
+            }
+            Err(e) => {
+                tracing::warn!(error = %e, "FSTP_TRUSTED_ISSUERS_JSON parse failed — use single quotes in .env");
             }
         }
+    } else {
+        if let Some(path) = loaded_dotenv {
+            warn_if_trusted_issuers_commented_in_dotenv(path);
+        } else {
+            for path in [".env", "fstp/.env"] {
+                if std::path::Path::new(path).exists() {
+                    warn_if_trusted_issuers_commented_in_dotenv(path);
+                    break;
+                }
+            }
+        }
+        tracing::warn!(
+            "FSTP_TRUSTED_ISSUERS_JSON not set — external issuers rejected on verify-credential (uncomment in fstp/.env, single-quoted JSON)"
+        );
     }
 
     let shared_state = Arc::new(RwLock::new(server_state));
@@ -147,6 +244,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         key_pem_path: std::env::var("FSTP_KEY_PATH")
             .unwrap_or_else(|_| "certs/server.key".into())
             .into(),
+        client_ca_pem_path: std::env::var("FSTP_CLIENT_CA_PATH")
+            .ok()
+            .map(PathBuf::from),
     };
 
     let http_addr = std::env::var("FSTP_HTTP_ADDR").unwrap_or_else(|_| "0.0.0.0:8080".to_string());
@@ -157,6 +257,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let grpc_state = shared_state.clone();
 
     tracing::info!(http = %http_addr, grpc = %grpc_addr, "Launching SA network layers...");
+
+    if let Err(e) = preflight_listen_addr(&http_addr, "FSTP_HTTP_ADDR").await {
+        tracing::error!(error = %e, "Cannot start federation HTTP server");
+        return Err(e);
+    }
+    if let Err(e) = preflight_listen_addr(&grpc_addr, "FSTP_GRPC_ADDR").await {
+        tracing::error!(error = %e, "Cannot start local gRPC gateway");
+        return Err(e);
+    }
 
     // 5. Ejecución concurrente; abortar si cualquier servidor falla
     tokio::select! {

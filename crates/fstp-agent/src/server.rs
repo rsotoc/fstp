@@ -4,6 +4,7 @@
 mod auth;
 pub mod blocklace_admin;
 pub mod federation;
+mod mtls_accept;
 pub mod grpc;
 mod handlers;
 mod integration;

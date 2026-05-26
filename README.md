@@ -78,7 +78,8 @@ cargo bench -p fstp-core
 ```bash
 cp .env.example .env
 ./scripts/gen-dev-certs.sh   # once — creates certs/server.crt + server.key (gitignored)
-cargo run -p fstp-agent
+# HU-03: paste FSTP_TRUSTED_ISSUERS_JSON from smoke step [7] into .env (single-quoted JSON)
+cargo run -p fstp-agent      # loads .env automatically from fstp/ (or fstp/.env from repo root)
 ```
 
 `certs/` is gitignored. For production PKI see [`docs/MTLS-PRODUCTION.md`](docs/MTLS-PRODUCTION.md).

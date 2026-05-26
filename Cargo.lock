@@ -567,6 +567,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "dotenvy"
+version = "0.15.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
+
+[[package]]
 name = "dunce"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -704,21 +710,29 @@ dependencies = [
  "axum-server",
  "chrono",
  "criterion",
+ "dotenvy",
  "ed25519-dalek",
  "fstp-core",
  "hex",
+ "hyper",
+ "pin-project-lite",
  "proptest",
  "prost",
  "rand 0.8.6",
  "reqwest",
+ "rustls",
+ "rustls-pemfile",
  "serde",
  "serde_json",
  "sha2",
  "thiserror",
  "tokio",
+ "tokio-rustls",
+ "tokio-stream",
  "tonic",
  "tonic-build",
  "tower-http 0.5.2",
+ "tower-service",
  "tracing",
  "tracing-subscriber",
  "uuid",
@@ -1911,7 +1925,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ef86cd5876211988985292b91c96a8f2d298df24e75989a43a3c73f2d4d8168b"
 dependencies = [
  "aws-lc-rs",
+ "log",
  "once_cell",
+ "ring",
  "rustls-pki-types",
  "rustls-webpki",
  "subtle",

@@ -362,6 +362,28 @@ pub async fn register_peer_handler(
     let mut state_guard = state.write().await;
 
     if state_guard.federation.contains_key(&req.cert_fingerprint) {
+        if state_guard.upsert_peer_metadata(
+            &req.cert_fingerprint,
+            &req.endpoint_url,
+            req.peer_did.clone(),
+            PublicKey(verifying_key),
+        ) {
+            tracing::info!(
+                peer_cii = %req.peer_cii,
+                link_id = %req.link_id,
+                peer_did = ?req.peer_did,
+                "Admin: federation peer metadata updated (upsert)"
+            );
+            return (
+                StatusCode::OK,
+                Json(serde_json::json!({
+                    "status": "updated",
+                    "peer_cii": req.peer_cii,
+                    "link_id": req.link_id.to_string(),
+                })),
+            )
+                .into_response();
+        }
         return (
             StatusCode::CONFLICT,
             Json(serde_json::json!({"error": "peer already registered"})),

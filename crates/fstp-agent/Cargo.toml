@@ -18,8 +18,14 @@ fstp-core = { path = "../fstp-core" }
 
 # Servidor HTTP y middleware
 axum        = "0.7.9"
+hyper       = { version = "1", features = ["server", "http1"] }
 axum-server = { version = "0.7.1", features = ["tls-rustls"] }
 tower-http  = { version = "0.5.2", features = ["trace", "timeout"] }
+tower-service = "0.3"
+pin-project-lite = "0.2"
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+rustls-pemfile = "2"
+tokio-rustls = "0.26"
 # native-tls: ClientBuilder::danger_accept_invalid_certs for FSTP_DEV_INSECURE_OUTBOUND
 reqwest     = { version = "0.12", default-features = false, features = ["json", "native-tls"] }
 
@@ -39,8 +45,10 @@ sha2       = { workspace = true }
 
 # Async y observabilidad
 tokio              = { workspace = true }
+tokio-stream       = "0.1"
 tracing            = { workspace = true }
 tracing-subscriber = { workspace = true }
+dotenvy            = { workspace = true }
 ed25519-dalek = "2.2.0"
 
 [build-dependencies]

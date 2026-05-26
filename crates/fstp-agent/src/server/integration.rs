@@ -7,6 +7,7 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
+use fstp_core::identity::FederationContext;
 use fstp_core::types::{FederationEndpoint, FstpError, LinkId};
 use serde::{Deserialize, Serialize};
 
@@ -99,6 +100,44 @@ pub async fn present_passport_handler(
     };
 
     let subject_id = format!("{}:{}", req.source_subject_cii, req.citizen_id);
+
+    if dev_loopback_present_enabled() && same_sa_endpoint(&own_url, &target_endpoint.url) {
+        match loopback_present_subject_cii(
+            &state,
+            link_id,
+            &own_url,
+            &target_endpoint.cert_fingerprint,
+            &subject_id,
+        )
+        .await
+        {
+            Ok(subject_cii) => {
+                tracing::info!(
+                    citizen_id = req.citizen_id,
+                    target_did = %req.target_external_did,
+                    subject_cii = %subject_cii,
+                    "Present-passport accepted via dev loopback (same SA)"
+                );
+                return platform_json(PresentPassportPlatformResponse {
+                    accepted: true,
+                    target_subject_cii: Some(subject_cii),
+                    error_message: None,
+                    stub_response: false,
+                    contract_version: CONTRACT_VERSION,
+                });
+            }
+            Err(e) => {
+                tracing::warn!(error = %e, "Present-passport loopback failed");
+                return platform_json(PresentPassportPlatformResponse {
+                    accepted: false,
+                    target_subject_cii: None,
+                    error_message: Some(e.to_string()),
+                    stub_response: false,
+                    contract_version: CONTRACT_VERSION,
+                });
+            }
+        }
+    }
 
     let http = match build_http_client() {
         Ok(c) => c,
@@ -234,4 +273,45 @@ pub struct AdminSyncQuery {
 
 fn platform_json(body: PresentPassportPlatformResponse) -> Response {
     (StatusCode::OK, Json(body)).into_response()
+}
+
+/// Dev: skip outbound HTTPS to self (same bind URL) — avoids mTLS loopback TLS failures.
+fn dev_loopback_present_enabled() -> bool {
+    if std::env::var("FSTP_DEV_LOOPBACK_PRESENT")
+        .map(|v| v == "true" || v == "1")
+        .unwrap_or(false)
+    {
+        return true;
+    }
+    std::env::var("FSTP_DEV_INSECURE_OUTBOUND")
+        .map(|v| v == "true" || v == "1")
+        .unwrap_or(false)
+}
+
+fn normalize_sa_url(url: &str) -> String {
+    url.trim()
+        .trim_end_matches('/')
+        .to_lowercase()
+        .replace("localhost", "127.0.0.1")
+}
+
+fn same_sa_endpoint(own_url: &str, peer_url: &str) -> bool {
+    normalize_sa_url(own_url) == normalize_sa_url(peer_url)
+}
+
+/// Mirrors inbound `present_credential_handler` HKDF for P3 same-SA demos.
+async fn loopback_present_subject_cii(
+    state: &SharedState,
+    link_id: LinkId,
+    counterpart_url: &str,
+    peer_cert_fingerprint: &str,
+    subject_id: &str,
+) -> Result<String, FstpError> {
+    let state_read = state.read().await;
+    let ctx = FederationContext::new(
+        link_id,
+        FederationEndpoint::new(counterpart_url, peer_cert_fingerprint),
+    );
+    let subject_cii = state_read.gii.derive_subject_cii(&ctx, subject_id);
+    Ok(subject_cii.0)
 }

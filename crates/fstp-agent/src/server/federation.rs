@@ -12,6 +12,10 @@ use axum::{
     Router,
 };
 use axum_server::tls_rustls::RustlsConfig;
+use rustls::pki_types::{CertificateDer, PrivateKeyDer};
+use rustls::server::WebPkiClientVerifier;
+use rustls::RootCertStore;
+use rustls_pemfile::Item;
 use tokio::sync::RwLock;
 use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
@@ -28,6 +32,7 @@ use fstp_core::types::{ContextualId, FederationEndpoint, FstpError, LinkId, Publ
 use fstp_core::IssuerRegistry;
 
 use super::handlers;
+use super::mtls_accept::ClientCertInjectAcceptor;
 use super::integration;
 
 #[derive(Debug, Clone)]
@@ -130,6 +135,34 @@ impl ServerState {
             .insert(entry.cert_fingerprint.clone(), entry);
     }
 
+    /// Updates an existing peer (same TLS fingerprint) when pod_directory DID rotates (dev bootstrap).
+    pub fn upsert_peer_metadata(
+        &mut self,
+        cert_fingerprint: &str,
+        endpoint_url: &str,
+        peer_did: Option<String>,
+        peer_pubkey: fstp_core::types::PublicKey,
+    ) -> bool {
+        let Some(entry) = self.federation.get_mut(cert_fingerprint) else {
+            return false;
+        };
+        if let Some(ref old_did) = entry.peer_did {
+            self.peer_did_index.remove(&old_did.trim().to_lowercase());
+        }
+        if let Some(ref did) = peer_did {
+            entry.peer_did = Some(did.trim().to_string());
+            self.peer_did_index.insert(
+                did.trim().to_lowercase(),
+                cert_fingerprint.to_string(),
+            );
+        } else {
+            entry.peer_did = None;
+        }
+        entry.endpoint = FederationEndpoint::new(endpoint_url, cert_fingerprint);
+        entry.peer_pubkey = peer_pubkey;
+        true
+    }
+
     pub fn peer_by_did(&self, did: &str) -> Option<&FederationEntry> {
         let fp = self.peer_did_index.get(&did.trim().to_lowercase())?;
         self.federation.get(fp)
@@ -191,12 +224,95 @@ pub fn build_router(state: SharedState) -> Router {
 pub struct TlsParams {
     pub cert_pem_path: PathBuf,
     pub key_pem_path: PathBuf,
+    /// When set, require client certs signed by this CA (P5 mTLS).
+    pub client_ca_pem_path: Option<PathBuf>,
 }
 
 pub async fn load_tls_config(params: &TlsParams) -> Result<RustlsConfig> {
-    RustlsConfig::from_pem_file(&params.cert_pem_path, &params.key_pem_path)
+    let cert_pem = tokio::fs::read(&params.cert_pem_path)
         .await
-        .map_err(|e| FstpError::TlsError(e.to_string()))
+        .map_err(|e| FstpError::TlsError(format!("read cert: {e}")))?;
+    let key_pem = tokio::fs::read(&params.key_pem_path)
+        .await
+        .map_err(|e| FstpError::TlsError(format!("read key: {e}")))?;
+
+    let server_config = build_server_config(&cert_pem, &key_pem, params.client_ca_pem_path.as_deref())?;
+    Ok(RustlsConfig::from_config(Arc::new(server_config)))
+}
+
+fn build_server_config(
+    cert_pem: &[u8],
+    key_pem: &[u8],
+    client_ca_path: Option<&std::path::Path>,
+) -> Result<rustls::ServerConfig> {
+    let certs: Vec<CertificateDer<'static>> = rustls_pemfile::certs(&mut &*cert_pem)
+        .collect::<std::result::Result<Vec<_>, _>>()
+        .map_err(|e| FstpError::TlsError(format!("parse server cert: {e}")))?
+        .into_iter()
+        .map(|c| c.into_owned())
+        .collect();
+
+    let key = read_private_key(key_pem)?;
+
+    let mut config = if let Some(ca_path) = client_ca_path {
+        let ca_pem = std::fs::read(ca_path)
+            .map_err(|e| FstpError::TlsError(format!("read client CA {}: {e}", ca_path.display())))?;
+        let mut roots = RootCertStore::empty();
+        for cert in rustls_pemfile::certs(&mut ca_pem.as_slice()) {
+            let cert = cert.map_err(|e| FstpError::TlsError(format!("parse client CA: {e}")))?;
+            roots
+                .add(cert.into_owned())
+                .map_err(|e| FstpError::TlsError(format!("add client CA: {e}")))?;
+        }
+        let verifier = WebPkiClientVerifier::builder(roots.into())
+            .allow_unauthenticated()
+            .build()
+            .map_err(|e| FstpError::TlsError(format!("client verifier: {e}")))?;
+        tracing::info!(
+            ca = %ca_path.display(),
+            "mTLS: optional client certificate (peer routes enforce fingerprint in middleware)"
+        );
+        rustls::ServerConfig::builder()
+            .with_client_cert_verifier(verifier)
+            .with_single_cert(certs, key)
+            .map_err(|e| FstpError::TlsError(format!("server config: {e}")))?
+    } else {
+        tracing::warn!(
+            "FSTP_CLIENT_CA_PATH unset — TLS accepts connections without client certificate"
+        );
+        rustls::ServerConfig::builder()
+            .with_no_client_auth()
+            .with_single_cert(certs, key)
+            .map_err(|e| FstpError::TlsError(format!("server config: {e}")))?
+    };
+
+    config.alpn_protocols = vec![b"h2".to_vec(), b"http/1.1".to_vec()];
+    Ok(config)
+}
+
+fn read_private_key(key_pem: &[u8]) -> Result<PrivateKeyDer<'static>> {
+    let mut keys: Vec<PrivateKeyDer<'static>> = rustls_pemfile::read_all(&mut &*key_pem)
+        .filter_map(|item| match item.ok()? {
+            Item::Sec1Key(k) => Some(
+                PrivateKeyDer::try_from(k.secret_sec1_der().to_vec())
+                    .map_err(|e| FstpError::TlsError(e.to_string()))
+                    .ok()?,
+            ),
+            Item::Pkcs1Key(k) => Some(
+                PrivateKeyDer::try_from(k.secret_pkcs1_der().to_vec())
+                    .map_err(|e| FstpError::TlsError(e.to_string()))
+                    .ok()?,
+            ),
+            Item::Pkcs8Key(k) => Some(
+                PrivateKeyDer::try_from(k.secret_pkcs8_der().to_vec())
+                    .map_err(|e| FstpError::TlsError(e.to_string()))
+                    .ok()?,
+            ),
+            _ => None,
+        })
+        .collect();
+    keys.pop()
+        .ok_or_else(|| FstpError::TlsError("no private key in PEM".into()))
 }
 
 /// Launches the HTTPS federation server.
@@ -212,9 +328,12 @@ pub async fn serve(addr: &str, state: SharedState, tls: TlsParams) -> Result<()>
         .parse()
         .map_err(|e| FstpError::TlsError(format!("invalid bind address: {e}")))?;
 
+    let acceptor = ClientCertInjectAcceptor::new(tls_config);
+
     tracing::info!("FSTP federation server listening on {addr}");
 
-    axum_server::bind_rustls(addr, tls_config)
+    axum_server::bind(addr)
+        .acceptor(acceptor)
         .serve(router.into_make_service_with_connect_info::<SocketAddr>())
         .await
         .map_err(|e| FstpError::TlsError(e.to_string()))
