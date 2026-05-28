@@ -87,6 +87,9 @@ pub struct ServerState {
     /// Trusted issuer DIDs for gRPC credential verification.
     pub issuer_registry: IssuerRegistry,
 
+    /// BBS+ public keys by issuer DID (verify-only, ADR-AGR-278 P5).
+    pub bbs_issuer_registry: HashMap<String, String>,
+
     /// Local node DID (issuer for outbound present-credential).
     pub node_did: fstp_core::types::Did,
 
@@ -160,6 +163,7 @@ impl ServerState {
             audit: AuditLog::with_transparent(transparent_log),
             signer,
             issuer_registry: IssuerRegistry::default(),
+            bbs_issuer_registry: HashMap::new(),
             node_did,
             own_endpoint_url,
             peer_did_index: HashMap::new(),
@@ -288,6 +292,14 @@ pub fn build_router(state: SharedState) -> Router {
         .route(
             "/fstp/admin/trusted-issuers/status",
             get(super::trusted_issuers_admin::trusted_issuers_status_handler),
+        )
+        .route(
+            "/fstp/admin/bbs-trusted-issuers/register",
+            post(super::bbs_trusted_issuers_admin::register_bbs_issuer_handler),
+        )
+        .route(
+            "/fstp/admin/bbs-trusted-issuers/status",
+            get(super::bbs_trusted_issuers_admin::bbs_issuers_status_handler),
         )
         .route(
             "/fstp/admin/transparent-log/status",
