@@ -5,6 +5,7 @@ mod auth;
 pub mod bbs_crypto;
 pub mod blocklace_admin;
 pub mod federation;
+pub mod local_admin;
 pub mod outbound_admin;
 pub mod trusted_issuers_admin;
 pub mod quorum_admin;

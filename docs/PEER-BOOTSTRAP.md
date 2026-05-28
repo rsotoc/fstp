@@ -92,6 +92,22 @@ Alineado a [`platform_util::link_id_from_pair`](../crates/fstp-agent/src/platfor
 
 ---
 
+## Re-ejecutar sin reinicio (dev)
+
+```http
+POST /api/dev/fstp/peer-bootstrap/run
+```
+
+Perfil `dev` únicamente. Respuesta: `{ registered, skipped }`.
+
+## Verificación automática (P5)
+
+```bash
+./scripts/smoke-p5-peer-bootstrap.sh
+```
+
+Requiere PKI en `fstp/certs/p5-dev` y fstp-agent en `FSTP_PROFILE=production`.
+
 ## Verificación manual
 
 ```bash

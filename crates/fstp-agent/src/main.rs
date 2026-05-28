@@ -242,6 +242,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let http_state = shared_state.clone();
     let grpc_state = shared_state.clone();
+    let local_admin_state = shared_state.clone();
+    let local_admin_bind = std::env::var("FSTP_LOCAL_ADMIN_BIND")
+        .unwrap_or_else(|_| "127.0.0.1:9091".to_string());
 
     tracing::info!(http = %http_addr, grpc = %grpc_addr, "Launching SA network layers...");
 
@@ -256,6 +259,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 5. Ejecución concurrente; abortar si cualquier servidor falla
     tokio::select! {
+        res = server::local_admin::serve_loopback(&local_admin_bind, local_admin_state) => {
+            if let Err(e) = res {
+                tracing::error!(error = %e, "Local operator API stopped");
+            }
+        }
         res = server::serve(&http_addr, http_state, tls_params) => {
             if let Err(e) = res {
                 tracing::error!(error = %e, "Catastrophic failure in mTLS Federation HTTP Server");
