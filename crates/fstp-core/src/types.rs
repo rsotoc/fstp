@@ -136,6 +136,13 @@ impl FederationEndpoint {
     pub fn present_credential_url(&self) -> String {
         format!("{}/fstp/present-credential", self.url.trim_end_matches('/'))
     }
+
+    pub fn identity_event_url(&self) -> String {
+        format!(
+            "{}/fstp/federation/identity",
+            self.url.trim_end_matches('/')
+        )
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -251,6 +258,9 @@ pub enum FstpError {
 
     #[error("persistence error: {0}")]
     PersistenceError(String),
+
+    #[error("invalid pod credentials (passphrase)")]
+    InvalidCredentials,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

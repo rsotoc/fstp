@@ -1,10 +1,13 @@
 //! Federation Sync Client.
 //! Initiates the active Frontier Exchange and Block Push protocols (Definition 3.1).
 
+use std::time::Duration;
+
 use crate::server::SharedState;
 use chrono::Utc;
 use fstp_core::blocklace::{Block, BlocklaceStore};
 use fstp_core::crypto::verify_response_signature;
+use fstp_core::sync_policy::SyncPolicy;
 use fstp_core::types::{
     ContextualId, FederationEndpoint, FrontierRequest, FrontierResponse, FstpError, LinkId, Result,
     SyncOutcome, SyncResult,
@@ -20,8 +23,30 @@ impl FstpClient {
     /// En producción, este cliente se configurará para cargar las llaves x509 locales
     /// y ejecutar la autenticación mutua TLS (mTLS).
     pub fn new() -> Self {
+        Self::from_builder(reqwest::Client::builder())
+    }
+
+    pub fn new_with_policy(policy: &SyncPolicy) -> Self {
+        Self::from_builder(
+            reqwest::Client::builder()
+                .connect_timeout(Duration::from_secs(policy.connect_timeout_secs))
+                .timeout(Duration::from_secs(policy.response_timeout_secs)),
+        )
+    }
+
+    pub fn from_shared_http(http_client: reqwest::Client) -> Self {
+        Self { http_client }
+    }
+
+    pub fn http_client(&self) -> &reqwest::Client {
+        &self.http_client
+    }
+
+    fn from_builder(builder: reqwest::ClientBuilder) -> Self {
         Self {
-            http_client: reqwest::Client::new(),
+            http_client: builder
+                .build()
+                .expect("reqwest client must build"),
         }
     }
 

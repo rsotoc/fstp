@@ -13,7 +13,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 
-use crate::types::{ContextualId, LinkId, Sha256Hash};
+use crate::types::{ContextualId, LinkId, RejectionReason, Sha256Hash};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Audit record — only metadata, never content
@@ -58,6 +58,7 @@ pub struct AuditRecord {
 #[derive(Debug, Clone)]
 pub struct AuditLog {
     inner: Arc<Mutex<AuditLogInner>>,
+    transparent: Option<Arc<crate::transparent_log::TransparentLog>>,
 }
 
 #[derive(Debug)]
@@ -73,6 +74,17 @@ impl AuditLog {
                 records: Vec::new(),
                 seq: 0,
             })),
+            transparent: None,
+        }
+    }
+
+    pub fn with_transparent(transparent: Arc<crate::transparent_log::TransparentLog>) -> Self {
+        Self {
+            inner: Arc::new(Mutex::new(AuditLogInner {
+                records: Vec::new(),
+                seq: 0,
+            })),
+            transparent: Some(transparent),
         }
     }
 
@@ -120,6 +132,25 @@ impl AuditLog {
         });
     }
 
+    /// Inbound message rejected before state mutation (AGR-104 `RECV_REJECTED`).
+    pub fn record_inbound_rejected(
+        &self,
+        message_type: impl Into<String>,
+        peer_cii: Option<ContextualId>,
+        summary: impl Into<String>,
+        reason: RejectionReason,
+    ) {
+        if let Some(tlog) = &self.transparent {
+            let _ = tlog.append_recv_rejected(
+                message_type.into(),
+                format!("reject-{}", Utc::now().timestamp_millis()),
+                peer_cii.clone(),
+                summary.into(),
+                reason,
+            );
+        }
+    }
+
     fn append(&self, mut record: AuditRecord) {
         let mut inner = self.inner.lock().expect("audit log mutex poisoned");
         inner.seq += 1;
@@ -138,7 +169,11 @@ impl AuditLog {
             "[FSTP AUDIT]"
         );
 
-        inner.records.push(record);
+        inner.records.push(record.clone());
+
+        if let Some(tlog) = &self.transparent {
+            let _ = tlog.append_audit_record(&record);
+        }
     }
 
     /// Returns all audit records for the current session, in insertion order.

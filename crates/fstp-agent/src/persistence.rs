@@ -24,13 +24,20 @@ use fstp_core::types::{FstpError, Result};
 
 /// Persisted snapshot of an `InMemoryBlocklace`.
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
-struct BlocklaceSnapshot {
-    version: u32,
-    blocks: Vec<Block>,
+pub(crate) struct BlocklaceSnapshot {
+    pub version: u32,
+    pub blocks: Vec<Block>,
+}
+
+/// Load a Blocklace from a **legacy plaintext** path (migration only).
+pub fn load_plain_snapshot(path: &Path) -> Result<InMemoryBlocklace> {
+    load_or_new(path)
 }
 
 /// Load a Blocklace from `path`, or return a fresh empty one if the file
 /// does not exist. Returns an error if the file exists but cannot be parsed.
+///
+/// Prefer [`crate::pod_runtime::load_blocklace`] with an encrypted pod (F01-1).
 pub fn load_or_new(path: &Path) -> Result<InMemoryBlocklace> {
     if !path.exists() {
         tracing::info!(path = %path.display(), "No existing Blocklace snapshot — starting fresh");
@@ -110,7 +117,7 @@ pub fn flush(bl: &InMemoryBlocklace, path: &Path) -> Result<()> {
     Ok(())
 }
 
-/// Default path for the Blocklace snapshot, configurable via `FSTP_BLOCKLACE_PATH`.
+/// Legacy plaintext path (`FSTP_BLOCKLACE_PATH`). New deployments use the encrypted pod.
 pub fn default_path() -> PathBuf {
     std::env::var("FSTP_BLOCKLACE_PATH")
         .unwrap_or_else(|_| "data/blocklace.json".to_string())

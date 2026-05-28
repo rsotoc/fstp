@@ -23,4 +23,12 @@ impl IssuerRegistry {
     pub fn len(&self) -> usize {
         self.by_did.len()
     }
+
+    /// All registered issuers (DID string, public key).
+    pub fn entries(&self) -> Vec<(String, PublicKey)> {
+        self.by_did
+            .iter()
+            .map(|(did, pk)| (did.clone(), pk.clone()))
+            .collect()
+    }
 }

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+// AGR-113 — Ágora (JVM) → Sync Agent (Rust) boundary DTO.
+// Canonical copy: fstp/schema/gen-notification.proto
+package agora.notification;
+
+option java_multiple_files = true;
+option java_package = "com.agora.fstp.notification";
+
+message GovernanceEventNotification {
+  string event_class       = 1;
+  int64  timestamp_utc_ms  = 2;
+  string process_id        = 3;
+  bool   quorum_met        = 4;
+  uint32 participant_count = 5;
+  bytes  content_hash      = 6;
+  bytes  instance_signature = 7;
+}
+
+message GovernanceEventAck {
+  bool   accepted        = 1;
+  string block_hash_hex  = 2;
+  string error_code      = 3;
+}

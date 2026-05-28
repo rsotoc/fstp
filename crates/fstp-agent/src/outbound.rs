@@ -3,8 +3,8 @@
 
 use chrono::{Duration, Utc};
 use fstp_core::crypto::NodeSigner;
-use fstp_core::message::{CredentialType, CredentialValidity};
-use fstp_core::types::{Did, FederationEndpoint, FstpError, LinkId, Result};
+use fstp_core::message::{CredentialType, CredentialValidity, FstpMessage, IdentityEventKind};
+use fstp_core::types::{ContextualId, Did, FederationEndpoint, FstpError, LinkId, Result};
 use serde::{Deserialize, Serialize};
 
 /// Payload mirrored from `handlers::PresentCredentialRequest` (inbound peer API).
@@ -143,6 +143,54 @@ fn dev_trust_present_credential() -> bool {
     std::env::var("FSTP_DEV_TRUST_PRESENT_CREDENTIAL")
         .map(|v| v == "true" || v == "1")
         .unwrap_or(false)
+}
+
+/// Build and sign an `IdentityEvent`, POST to the peer's federation identity endpoint.
+pub async fn send_identity_event(
+    http: &reqwest::Client,
+    signer: &NodeSigner,
+    instance_cii: &ContextualId,
+    own_endpoint: &FederationEndpoint,
+    target: &FederationEndpoint,
+    event: IdentityEventKind,
+) -> Result<()> {
+    let timestamp = Utc::now();
+    let pubkey = signer.public_key();
+    let signature = signer.sign_identity_event(&event, instance_cii, own_endpoint, &timestamp);
+
+    let msg = FstpMessage::IdentityEvent {
+        event,
+        instance_cii: instance_cii.clone(),
+        pubkey,
+        endpoint: own_endpoint.clone(),
+        timestamp,
+        signature,
+    };
+
+    let url = target.identity_event_url();
+    tracing::debug!(%url, "Outbound: POST identity event");
+
+    let mut request = http.post(&url).json(&msg);
+    if dev_trust_present_credential() {
+        let key = std::env::var("FSTP_POD_AGENT_KEY")
+            .or_else(|_| std::env::var("FSTP_AGORA_POD_AGENT_KEY"))
+            .unwrap_or_else(|_| "dev-pod-agent-key".to_string());
+        request = request.header("X-Pod-Agent-Key", key);
+    }
+
+    let http_res = request.send().await.map_err(|e| {
+        FstpError::SyncFailed {
+            link_id: uuid::Uuid::nil(),
+            reason: format!("identity event HTTP: {e}"),
+        }
+    })?;
+
+    if !http_res.status().is_success() {
+        let status = http_res.status().as_u16();
+        let body = http_res.text().await.unwrap_or_default();
+        return Err(FstpError::HttpError { status, body });
+    }
+    Ok(())
 }
 
 pub fn build_http_client() -> Result<reqwest::Client> {

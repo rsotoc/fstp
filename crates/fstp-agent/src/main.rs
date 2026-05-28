@@ -2,14 +2,24 @@
 //! Launches concurrent mTLS Axum federation server and local gRPC gateway.
 
 mod agora_notify;
+mod agora_socket;
 mod client;
+mod governance_notify;
+mod heartbeat_scheduler;
 mod outbound;
+mod node_identity;
+mod outbound_worker;
 mod persistence;
+mod pod_runtime;
 mod platform_util;
 mod production;
+mod quorum_gate;
+mod quorum_service;
+mod quorum_store;
 mod residence;
 mod server;
 mod sync_scheduler;
+mod trusted_issuers;
 
 use std::net::SocketAddr;
 use std::path::PathBuf;
@@ -102,33 +112,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // un archivo PEM o un HSM). Aquí se lee de la variable de entorno FSTP_NODE_IKM
     // o se genera aleatoriamente para desarrollo local.
     //
-    // TODO(production): load IKM from the node's DID private key bytes, not from
-    // an environment variable. The env var approach is acceptable for local dev
-    // but must not be used in a deployed federation node.
-    let ikm: Vec<u8> = std::env::var("FSTP_NODE_IKM")
-        .map(|s| s.into_bytes())
-        .unwrap_or_else(|_| {
-            tracing::warn!(
-                "FSTP_NODE_IKM not set — using ephemeral random IKM. \
-                CIIs will change on restart. Set FSTP_NODE_IKM for stable identities."
-            );
-            use std::collections::hash_map::DefaultHasher;
-            use std::hash::{Hash, Hasher};
-            let mut h = DefaultHasher::new();
-            std::time::SystemTime::now().hash(&mut h);
-            h.finish().to_le_bytes().repeat(4) // 32 bytes
-        });
+    let ikm = node_identity::resolve_node_ikm().map_err(|e| format!("{e}"))?;
 
-    let node_did_str =
-        std::env::var("FSTP_NODE_DID").unwrap_or_else(|_| "did:key:local-dev-node".to_string());
-
-    // Extraer el seed del signer ANTES de mover ikm a GlobalInstanceId.
-    let signer_seed: [u8; 32] = {
-        let mut seed = [0u8; 32];
-        let src = if ikm.len() >= 32 { &ikm[..32] } else { &ikm };
-        seed[..src.len()].copy_from_slice(src);
-        seed
+    let node_did_str = if production::is_production_profile() {
+        std::env::var("FSTP_NODE_DID").map_err(|_| {
+            "FSTP_NODE_DID required in production (see docs/MTLS-PRODUCTION.md)".to_string()
+        })?
+    } else {
+        std::env::var("FSTP_NODE_DID").unwrap_or_else(|_| "did:key:local-dev-node".to_string())
     };
+
+    let signer_seed = node_identity::signer_seed_from_ikm(&ikm);
 
     let gii = GlobalInstanceId::new(Did::new(&node_did_str), ikm);
 
@@ -154,81 +148,74 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let signer = NodeSigner::from_seed(&signer_seed);
     tracing::info!(pubkey = %hex::encode(signer.public_key().0.as_bytes()), "Node signing key ready");
 
-    // 4. Crear el estado compartido, cargando el Blocklace desde disco si existe
-    let blocklace_path = persistence::default_path();
-    if let Some(parent) = blocklace_path.parent() {
-        std::fs::create_dir_all(parent).ok();
-    }
-    let blocklace = persistence::load_or_new(&blocklace_path)?;
+    // 4. Encrypted pod (AGR-101) + Blocklace snapshot inside pod/blocklace/
+    let pod = pod_runtime::open_pod()?;
+    let blocklace = pod_runtime::load_blocklace(&pod)?;
+    let sync_crdt = pod_runtime::load_sync_crdt(&pod)?;
+    let transparent_log = pod_runtime::open_transparent_log()?;
+    let sync_policy = pod_runtime::load_sync_policy(&pod)?;
 
     let node_did = Did::new(&node_did_str);
+    let identity = pod_runtime::NodeIdentity {
+        did: node_did_str.clone(),
+        own_url: own_endpoint_url.clone(),
+        root_link_id: root_link_id.to_string(),
+        own_cii: own_cii.0.clone(),
+    };
+    pod_runtime::persist_node_identity(&pod, &identity)?;
+
     let mut server_state = ServerState::new_with_blocklace(
         own_cii.clone(),
         gii.clone(),
         signer,
         blocklace,
+        pod.clone(),
+        sync_crdt,
+        transparent_log,
         node_did.clone(),
         own_endpoint_url.clone(),
+        sync_policy,
     );
     server_state
         .issuer_registry
         .register(node_did.clone(), server_state.signer.public_key());
 
-    // Optional: FSTP_TRUSTED_ISSUERS_JSON=[{"did":"did:key:…","pubkeyHex":"…64 hex…"}] (camelCase or pubkey_hex)
-    if let Ok(json) = std::env::var("FSTP_TRUSTED_ISSUERS_JSON") {
-        #[derive(serde::Deserialize)]
-        #[serde(rename_all = "camelCase")]
-        struct TrustedIssuer {
-            did: String,
-            #[serde(alias = "pubkey_hex")]
-            pubkey_hex: String,
-        }
-        match serde_json::from_str::<Vec<TrustedIssuer>>(&json) {
-            Ok(list) => {
-                let mut loaded = 0u32;
-                for entry in list {
-                    if let Ok(bytes) = hex::decode(entry.pubkey_hex.trim()) {
-                        if let Ok(arr) = <[u8; 32]>::try_from(bytes.as_slice()) {
-                            if let Ok(vk) = ed25519_dalek::VerifyingKey::from_bytes(&arr) {
-                                server_state.issuer_registry.register(
-                                    Did::new(&entry.did),
-                                    fstp_core::types::PublicKey(vk),
-                                );
-                                loaded += 1;
-                                tracing::info!(did = %entry.did, "trusted issuer loaded from FSTP_TRUSTED_ISSUERS_JSON");
-                            }
-                        }
+    match trusted_issuers::bootstrap_trusted_issuers(&pod, &mut server_state.issuer_registry) {
+        Ok(n) if n > 0 => tracing::info!(count = n, "Trusted issuers bootstrapped"),
+        Ok(_) => {
+            if let Some(path) = loaded_dotenv {
+                warn_if_trusted_issuers_commented_in_dotenv(path);
+            } else {
+                for path in [".env", "fstp/.env"] {
+                    if std::path::Path::new(path).exists() {
+                        warn_if_trusted_issuers_commented_in_dotenv(path);
+                        break;
                     }
                 }
-                if loaded == 0 {
-                    tracing::warn!(
-                        "FSTP_TRUSTED_ISSUERS_JSON parsed but no issuer registered — check 64-char pubkeyHex"
-                    );
-                } else {
-                    tracing::info!(count = loaded, "FSTP_TRUSTED_ISSUERS_JSON applied");
-                }
             }
-            Err(e) => {
-                tracing::warn!(error = %e, "FSTP_TRUSTED_ISSUERS_JSON parse failed — use single quotes in .env");
+            if !production::is_production_profile() {
+                tracing::warn!(
+                    "No trusted issuers in pod/env — external verify-credential will fail until FSTP_TRUSTED_ISSUERS_JSON is set"
+                );
             }
         }
-    } else {
-        if let Some(path) = loaded_dotenv {
-            warn_if_trusted_issuers_commented_in_dotenv(path);
-        } else {
-            for path in [".env", "fstp/.env"] {
-                if std::path::Path::new(path).exists() {
-                    warn_if_trusted_issuers_commented_in_dotenv(path);
-                    break;
-                }
-            }
-        }
-        tracing::warn!(
-            "FSTP_TRUSTED_ISSUERS_JSON not set — external issuers rejected on verify-credential (uncomment in fstp/.env, single-quoted JSON)"
-        );
+        Err(e) => return Err(format!("trusted issuers bootstrap: {e}").into()),
     }
 
+    production::validate_production_issuers(&server_state.issuer_registry, &node_did)
+        .map_err(|e| format!("{e}"))?;
+
+    if let Ok(Some(cfg)) = quorum_store::load_config(&pod) {
+        server_state.quorum_gate.config = Some(cfg);
+    }
+    production::validate_production_quorum(&server_state.quorum_gate)
+        .map_err(|e| format!("{e}"))?;
+
     let shared_state = Arc::new(RwLock::new(server_state));
+
+    agora_socket::spawn(shared_state.clone());
+    heartbeat_scheduler::spawn(shared_state.clone());
+    outbound_worker::spawn(shared_state.clone());
 
     if let Ok(secs) = std::env::var("FSTP_SYNC_INTERVAL_SECS") {
         if let Ok(interval) = secs.parse::<u64>() {
@@ -281,11 +268,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // Flush Blocklace to disk before exit
+    // Flush Blocklace into encrypted pod before exit
     {
         let state_read = shared_state.read().await;
-        if let Err(e) = persistence::flush(&state_read.blocklace, &blocklace_path) {
-            tracing::error!(error = %e, "Failed to flush Blocklace on shutdown");
+        if let Err(e) = state_read.flush_pod_blocklace() {
+            tracing::error!(error = %e, "Failed to flush Blocklace to encrypted pod on shutdown");
+        }
+        if let Err(e) = state_read.flush_pod_sync_crdt() {
+            tracing::error!(error = %e, "Failed to flush CRDT sync state to encrypted pod on shutdown");
         }
     }
 

@@ -1,0 +1,22 @@
+{
+  "threshold": 2,
+  "totalShares": 3,
+  "initialized": false,
+  "admins": [
+    {
+      "shareIndex": 1,
+      "name": "Administrador Principal",
+      "publicKeyHex": "0000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "shareIndex": 2,
+      "name": "Administrador Suplente A",
+      "publicKeyHex": "0000000000000000000000000000000000000000000000000000000000000002"
+    },
+    {
+      "shareIndex": 3,
+      "name": "Administrador Suplente B",
+      "publicKeyHex": "0000000000000000000000000000000000000000000000000000000000000003"
+    }
+  ]
+}

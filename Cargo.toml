@@ -14,8 +14,10 @@ ed25519-dalek = { version = "2.1.1", features = ["serde", "rand_core"] }
 sha2           = "0.10.8"
 hkdf           = "0.12.4"
 aes-gcm        = "0.10.3"
+argon2         = "0.5.3"
 rand           = "0.8.5"
 hex            = "0.4.3"
+dirs           = "5.0.1"
 
 # Tipos y serialización
 uuid    = { version = "1.11.0", features = ["v4", "serde"] }
@@ -31,8 +33,17 @@ tokio = { version = "1", features = ["full"] }
 tracing            = "0.1"
 tracing-subscriber = "0.3.23"
 
+# CRDT sync (AGR-103)
+automerge = "0.5.11"
+
+# Transparent log rotation (AGR-104)
+flate2 = "1.0.35"
+
 # Local .env (HU-03 trusted issuers, etc.)
 dotenvy = "0.15.7"
+
+# Shamir M-de-N (AGR-106)
+sharks = "0.5.0"
 
 # Tests
 criterion = { version = "0.5.1", features = ["html_reports"] }

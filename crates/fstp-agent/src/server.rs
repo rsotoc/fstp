@@ -2,8 +2,14 @@
 
 // 1. Declaramos los submódulos que están dentro de la carpeta server/
 mod auth;
+pub mod bbs_crypto;
 pub mod blocklace_admin;
 pub mod federation;
+pub mod outbound_admin;
+pub mod trusted_issuers_admin;
+pub mod quorum_admin;
+pub mod sync_admin;
+pub mod transparent_admin;
 mod mtls_accept;
 pub mod grpc;
 mod handlers;

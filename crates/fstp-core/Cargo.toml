@@ -21,7 +21,9 @@ ed25519-dalek = { workspace = true }
 sha2          = { workspace = true }
 hkdf          = { workspace = true }
 aes-gcm       = { workspace = true }
+argon2        = { workspace = true }
 rand          = { workspace = true }
+dirs          = { workspace = true }
 hex           = { workspace = true }
 
 # Tipos y serialización
@@ -37,6 +39,10 @@ tokio  = { workspace = true }
 # Observabilidad
 tracing = { workspace = true }
 base64 = "0.22.1"
+automerge = { workspace = true }
+flate2    = { workspace = true }
+sharks    = { workspace = true }
+bbs = "0.4.1"
 
 [dev-dependencies]
 criterion = { workspace = true }

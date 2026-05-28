@@ -28,6 +28,12 @@ use fstp_core::audit::AuditLog;
 use fstp_core::blocklace::InMemoryBlocklace;
 use fstp_core::crypto::NodeSigner;
 use fstp_core::identity::GlobalInstanceId;
+use fstp_core::pod_store::EncryptedPodStore;
+use fstp_core::inbound::InboundValidator;
+use fstp_core::offline_queue::OfflineOutboundQueue;
+use fstp_core::sync_crdt::SyncCrdtEngine;
+use fstp_core::sync_policy::SyncPolicy;
+use fstp_core::transparent_log::TransparentLog;
 use fstp_core::types::{ContextualId, FederationEndpoint, FstpError, LinkId, PublicKey, Result};
 use fstp_core::IssuerRegistry;
 
@@ -63,6 +69,15 @@ pub struct ServerState {
     /// Local Blocklace DAG.
     pub blocklace: InMemoryBlocklace,
 
+    /// Encrypted institutional pod (AGR-101).
+    pub pod: Arc<EncryptedPodStore>,
+
+    /// Automerge CRDT sync engine (AGR-103).
+    pub sync_crdt: SyncCrdtEngine,
+
+    /// Hash-linked federation traffic log (AGR-104).
+    pub transparent_log: Arc<TransparentLog>,
+
     /// Structured audit log (§4.2).
     pub audit: AuditLog,
 
@@ -80,6 +95,18 @@ pub struct ServerState {
 
     /// Secondary index: peer DID (lowercase) → cert fingerprint.
     peer_did_index: HashMap<String, String>,
+
+    /// In-memory offline outbound queue (AGR-102).
+    pub offline_queue: Arc<OfflineOutboundQueue>,
+
+    /// Heartbeat / timeout policy from `config/sync_policy.json`.
+    pub sync_policy: SyncPolicy,
+
+    /// Centralized inbound validation (AGR-102).
+    pub inbound_validator: InboundValidator,
+
+    /// Shamir M-of-N governance (AGR-106).
+    pub quorum_gate: crate::quorum_gate::QuorumGate,
 }
 
 impl ServerState {
@@ -87,21 +114,25 @@ impl ServerState {
         own_cii: ContextualId,
         gii: GlobalInstanceId,
         signer: NodeSigner,
+        pod: Arc<EncryptedPodStore>,
+        sync_crdt: SyncCrdtEngine,
+        transparent_log: Arc<TransparentLog>,
         node_did: fstp_core::types::Did,
         own_endpoint_url: String,
+        sync_policy: SyncPolicy,
     ) -> Self {
-        Self {
+        Self::new_with_blocklace(
             own_cii,
             gii,
-            federation: HashMap::new(),
-            blocklace: InMemoryBlocklace::new(),
-            audit: AuditLog::new(),
             signer,
-            issuer_registry: IssuerRegistry::default(),
+            InMemoryBlocklace::new(),
+            pod,
+            sync_crdt,
+            transparent_log,
             node_did,
             own_endpoint_url,
-            peer_did_index: HashMap::new(),
-        }
+            sync_policy,
+        )
     }
 
     pub fn new_with_blocklace(
@@ -109,21 +140,44 @@ impl ServerState {
         gii: GlobalInstanceId,
         signer: NodeSigner,
         blocklace: InMemoryBlocklace,
+        pod: Arc<EncryptedPodStore>,
+        sync_crdt: SyncCrdtEngine,
+        transparent_log: Arc<TransparentLog>,
         node_did: fstp_core::types::Did,
         own_endpoint_url: String,
+        sync_policy: SyncPolicy,
     ) -> Self {
+        let offline_queue =
+            Arc::new(OfflineOutboundQueue::new(sync_policy.offline_queue_capacity));
         Self {
             own_cii,
             gii,
             federation: HashMap::new(),
             blocklace,
-            audit: AuditLog::new(),
+            pod,
+            sync_crdt,
+            transparent_log: transparent_log.clone(),
+            audit: AuditLog::with_transparent(transparent_log),
             signer,
             issuer_registry: IssuerRegistry::default(),
             node_did,
             own_endpoint_url,
             peer_did_index: HashMap::new(),
+            offline_queue,
+            sync_policy,
+            inbound_validator: InboundValidator::default(),
+            quorum_gate: crate::quorum_gate::QuorumGate::default(),
         }
+    }
+
+    /// Persist Blocklace snapshot + frontier into the encrypted pod.
+    pub fn flush_pod_blocklace(&self) -> Result<()> {
+        crate::pod_runtime::flush_blocklace(&self.pod, &self.blocklace)
+    }
+
+    /// Persist Automerge CRDT state into `pod/sync_state.json`.
+    pub fn flush_pod_sync_crdt(&self) -> Result<()> {
+        crate::pod_runtime::flush_sync_crdt(&self.pod, &self.sync_crdt)
     }
 
     pub fn register_peer(&mut self, entry: FederationEntry) {
@@ -189,6 +243,10 @@ pub fn build_router(state: SharedState) -> Router {
             "/fstp/federation/control",
             post(handlers::federation_control_handler),
         )
+        .route(
+            "/fstp/federation/identity",
+            post(handlers::identity_event_handler),
+        )
         .route("/fstp/admin/peers", post(handlers::register_peer_handler))
         .route(
             "/rpc/verify-credential",
@@ -214,6 +272,66 @@ pub fn build_router(state: SharedState) -> Router {
         .route(
             "/fstp/admin/blocklace/append",
             post(super::blocklace_admin::blocklace_append_handler),
+        )
+        .route(
+            "/fstp/admin/sync-status",
+            get(super::sync_admin::sync_status_handler),
+        )
+        .route(
+            "/fstp/admin/outbound-queue/status",
+            get(super::outbound_admin::outbound_queue_status_handler),
+        )
+        .route(
+            "/fstp/admin/trusted-issuers/register",
+            post(super::trusted_issuers_admin::register_trusted_issuer_handler),
+        )
+        .route(
+            "/fstp/admin/trusted-issuers/status",
+            get(super::trusted_issuers_admin::trusted_issuers_status_handler),
+        )
+        .route(
+            "/fstp/admin/transparent-log/status",
+            get(super::transparent_admin::transparent_log_status_handler),
+        )
+        .route(
+            "/fstp/admin/transparent-log/query",
+            get(super::transparent_admin::transparent_log_query_handler),
+        )
+        .route(
+            "/fstp/admin/quorum/status",
+            get(super::quorum_admin::quorum_status_handler),
+        )
+        .route(
+            "/fstp/admin/quorum/setup",
+            post(super::quorum_admin::quorum_setup_handler),
+        )
+        .route(
+            "/fstp/admin/quorum/recover",
+            post(super::quorum_admin::quorum_recover_handler),
+        )
+        .route(
+            "/fstp/admin/quorum/unlock",
+            post(super::quorum_admin::quorum_unlock_handler),
+        )
+        .route(
+            "/fstp/admin/quorum/share/:index",
+            get(super::quorum_admin::quorum_export_share_handler),
+        )
+        .route(
+            "/fstp/crypto/bbs/keypair",
+            post(super::bbs_crypto::bbs_keypair_handler),
+        )
+        .route(
+            "/fstp/crypto/bbs/sign",
+            post(super::bbs_crypto::bbs_sign_handler),
+        )
+        .route(
+            "/fstp/crypto/bbs/derive-proof",
+            post(super::bbs_crypto::bbs_derive_proof_handler),
+        )
+        .route(
+            "/fstp/crypto/bbs/verify-proof",
+            post(super::bbs_crypto::bbs_verify_proof_handler),
         )
         .layer(TraceLayer::new_for_http())
         .layer(TimeoutLayer::new(Duration::from_secs(30)))

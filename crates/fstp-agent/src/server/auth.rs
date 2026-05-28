@@ -193,18 +193,32 @@ mod tests {
     fn make_state_with_peer(fingerprint: &str) -> SharedState {
         let signer = NodeSigner::generate();
         let peer_signer = NodeSigner::generate();
-        use fstp_core::identity::{FederationContext, GlobalInstanceId};
+        use fstp_core::identity::GlobalInstanceId;
+        use fstp_core::pod_store::EncryptedPodStore;
         use fstp_core::types::Did;
         let gii = GlobalInstanceId::new(
             Did::new("did:key:server"),
             b"test-server-ikm-32-bytes!!!!!!!!".to_vec(),
         );
+        let pod_root = std::env::temp_dir().join(format!("fstp-auth-test-{}", Uuid::new_v4()));
+        let pod = Arc::new(
+            EncryptedPodStore::initialize(&pod_root, "test-passphrase")
+                .expect("test pod init"),
+        );
+        let sync_crdt = fstp_core::sync_crdt::SyncCrdtEngine::new();
+        let transparent_log = Arc::new(
+            fstp_core::transparent_log::TransparentLog::open(pod_root.join("logs")).unwrap(),
+        );
         let mut state = ServerState::new(
             ContextualId::new("cii:server"),
             gii,
             signer,
+            pod,
+            sync_crdt,
+            transparent_log,
             Did::new("did:key:server"),
             "https://example.com".to_string(),
+            fstp_core::sync_policy::SyncPolicy::default(),
         );
         state.register_peer(FederationEntry {
             peer_cii: ContextualId::new("cii:peer-a"),

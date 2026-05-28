@@ -20,8 +20,12 @@
 use chrono::{DateTime, Utc};
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
 use rand::rngs::OsRng;
+use serde::Serialize;
 
-use crate::types::{ContextualId, Ed25519Sig, FstpError, LinkId, PublicKey, Result, Sha256Hash};
+use crate::message::IdentityEventKind;
+use crate::types::{
+    ContextualId, Ed25519Sig, FederationEndpoint, FstpError, LinkId, PublicKey, Result, Sha256Hash,
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Canonical serialization helpers
@@ -79,6 +83,34 @@ pub fn frontier_request_signable(
     }
     bytes.extend_from_slice(&timestamp.timestamp().to_le_bytes());
     bytes
+}
+
+/// Canonical bytes for signing an `IdentityEvent` (Table 2, type 1).
+pub fn identity_event_signable(
+    event: &IdentityEventKind,
+    instance_cii: &ContextualId,
+    pubkey: &PublicKey,
+    endpoint: &FederationEndpoint,
+    timestamp: &DateTime<Utc>,
+) -> Vec<u8> {
+    #[derive(Serialize)]
+    struct Signable<'a> {
+        event: &'a IdentityEventKind,
+        instance_cii: &'a str,
+        pubkey_hex: String,
+        endpoint_url: &'a str,
+        cert_fingerprint: &'a str,
+        timestamp_unix_secs: i64,
+    }
+    let inner = Signable {
+        event,
+        instance_cii: &instance_cii.0,
+        pubkey_hex: hex::encode(pubkey.0.as_bytes()),
+        endpoint_url: &endpoint.url,
+        cert_fingerprint: &endpoint.cert_fingerprint,
+        timestamp_unix_secs: timestamp.timestamp(),
+    };
+    serde_json::to_vec(&inner).expect("IdentityEvent signable must serialize")
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -148,6 +180,19 @@ impl NodeSigner {
     pub fn sign_bytes(&self, bytes: &[u8]) -> Ed25519Sig {
         Ed25519Sig(self.signing_key.sign(bytes))
     }
+
+    /// Sign an `IdentityEvent` (heartbeat, CII announcement, etc.).
+    pub fn sign_identity_event(
+        &self,
+        event: &IdentityEventKind,
+        instance_cii: &ContextualId,
+        endpoint: &FederationEndpoint,
+        timestamp: &DateTime<Utc>,
+    ) -> Ed25519Sig {
+        let pubkey = self.public_key();
+        let bytes = identity_event_signable(event, instance_cii, &pubkey, endpoint, timestamp);
+        Ed25519Sig(self.signing_key.sign(&bytes))
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -180,6 +225,25 @@ pub fn verify_response_signature(
                 "FrontierResponse signature verification failed: {e}"
             ))
         })
+}
+
+/// Verify the signature on a received `FrontierRequest`.
+/// Verify the signature on a received `IdentityEvent`.
+pub fn verify_identity_event_signature(
+    event: &IdentityEventKind,
+    instance_cii: &ContextualId,
+    pubkey: &PublicKey,
+    endpoint: &FederationEndpoint,
+    timestamp: &DateTime<Utc>,
+    signature: &Ed25519Sig,
+    signer_pubkey: &PublicKey,
+) -> Result<()> {
+    let bytes = identity_event_signable(event, instance_cii, pubkey, endpoint, timestamp);
+    signer_pubkey.0.verify(&bytes, &signature.0).map_err(|e| {
+        FstpError::CryptoError(format!(
+            "IdentityEvent signature verification failed: {e}"
+        ))
+    })
 }
 
 /// Verify the signature on a received `FrontierRequest`.
@@ -317,6 +381,23 @@ mod tests {
             verify_response_signature(&cii, &link_id, &frontier_b, &ts, &sig_a, &pubkey).is_ok(),
             "Frontier hash order must not affect signature validity"
         );
+    }
+
+    #[test]
+    fn identity_event_sign_and_verify_roundtrip() {
+        use crate::message::IdentityEventKind;
+
+        let signer = NodeSigner::generate();
+        let cii = ContextualId::new("cii:heartbeat");
+        let endpoint = FederationEndpoint::new("https://node.example.org", "aabb");
+        let ts = Utc::now();
+        let event = IdentityEventKind::InstanceAlive;
+        let pubkey = signer.public_key();
+        let sig = signer.sign_identity_event(&event, &cii, &endpoint, &ts);
+        assert!(verify_identity_event_signature(
+            &event, &cii, &pubkey, &endpoint, &ts, &sig, &pubkey
+        )
+        .is_ok());
     }
 
     #[test]

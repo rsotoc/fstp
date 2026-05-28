@@ -18,7 +18,11 @@ use ed25519_dalek::Verifier;
 use fstp_core::blocklace::{AggregateAttrs, Block, BlockPayload, BlocklaceStore};
 use fstp_core::crypto::verify_request_signature;
 use fstp_core::identity::FederationContext;
-use fstp_core::message::{CredentialType, CredentialValidity, EventClass, FederationEventKind};
+use fstp_core::inbound::InboundValidationError;
+use fstp_core::message::{
+    CredentialType, CredentialValidity, EventClass, FederationEventKind, FstpMessage,
+    IdentityEventKind,
+};
 use fstp_core::sa_machine::{
     Idle, OperationOutcome, OperationRecord, SaOutboundArtifact, SaTransaction, TransmitOutcome,
     ValidationContext,
@@ -123,6 +127,14 @@ pub async fn frontier_handler(
         ) {
             drop(state_read);
             tracing::warn!(error = %e, "FrontierRequest signature invalid");
+            let state_read = state.read().await;
+            state_read.audit.record_inbound_rejected(
+                "frontier_request",
+                Some(payload.sender_cii.clone()),
+                "INVALID_REQUEST_SIGNATURE",
+                fstp_core::types::RejectionReason::InvalidSignature,
+            );
+            drop(state_read);
             return (StatusCode::UNAUTHORIZED, "INVALID_REQUEST_SIGNATURE").into_response();
         }
     }
@@ -617,10 +629,23 @@ struct FederationControlSignable<'a> {
 pub async fn federation_control_handler(
     State(state): State<SharedState>,
     Extension(peer_identity): Extension<PeerIdentity>,
+    headers: axum::http::HeaderMap,
     Json(req): Json<FederationControlHttpRequest>,
 ) -> Response {
     if req.from_cii != peer_identity.entry.peer_cii.0 {
         return (StatusCode::FORBIDDEN, "FROM_CII_MISMATCH").into_response();
+    }
+
+    if matches!(
+        req.event,
+        FederationEventKind::Terminate | FederationEventKind::Reject
+    ) {
+        let state_read = state.read().await;
+        if let Some(denied) =
+            super::quorum_admin::require_quorum_token(&state_read, &headers)
+        {
+            return denied;
+        }
     }
 
     let signable = match serde_json::to_vec(&FederationControlSignable {
@@ -760,6 +785,77 @@ pub async fn federation_control_handler(
         })),
     )
         .into_response()
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /fstp/federation/identity  — IdentityEvent (heartbeat, CII announcement)
+// ─────────────────────────────────────────────────────────────────────────────
+
+pub async fn identity_event_handler(
+    State(state): State<SharedState>,
+    Extension(peer_identity): Extension<PeerIdentity>,
+    Json(msg): Json<FstpMessage>,
+) -> Response {
+    let FstpMessage::IdentityEvent { instance_cii, .. } = &msg else {
+        let state_read = state.read().await;
+        state_read.audit.record_inbound_rejected(
+            "identity_event",
+            None,
+            "NOT_IDENTITY_EVENT",
+            fstp_core::types::RejectionReason::UnknownMessageType,
+        );
+        return (StatusCode::BAD_REQUEST, "NOT_IDENTITY_EVENT").into_response();
+    };
+
+    let expected = peer_identity.entry.peer_cii.clone();
+    let validation = {
+        let state_read = state.read().await;
+        state_read.inbound_validator.validate_fstp_message(
+            &msg,
+            &expected,
+            &expected,
+            &peer_identity.entry.peer_pubkey,
+        )
+    };
+
+    if let Err(err) = validation {
+        let reason = err.rejection_reason();
+        let summary = format!("{err:?}");
+        let state_read = state.read().await;
+        state_read.audit.record_inbound_rejected(
+            "identity_event",
+            Some(instance_cii.clone()),
+            summary,
+            reason,
+        );
+        let status = match err {
+            InboundValidationError::InvalidSignature => StatusCode::UNAUTHORIZED,
+            _ => StatusCode::BAD_REQUEST,
+        };
+        return (status, "IDENTITY_EVENT_REJECTED").into_response();
+    }
+
+    if !matches!(
+        &msg,
+        FstpMessage::IdentityEvent {
+            event: IdentityEventKind::InstanceAlive,
+            ..
+        }
+    ) {
+        tracing::info!(?msg, "Identity event accepted (non-heartbeat)");
+    }
+
+    let state_read = state.read().await;
+    state_read.audit.record_inbound(
+        "identity_event",
+        Some(instance_cii.clone()),
+        Some(peer_identity.entry.link_id),
+        None,
+        None,
+    );
+    drop(state_read);
+
+    (StatusCode::OK, Json(serde_json::json!({ "status": "accepted" }))).into_response()
 }
 
 async fn resolve_peer_identity(

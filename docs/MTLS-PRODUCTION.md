@@ -93,13 +93,58 @@ openssl x509 -in peer.crt -outform DER | openssl dgst -sha256 | awk '{print $2}'
 
 ---
 
+## Identidad estable (IKM)
+
+En `FSTP_PROFILE=production` el agente **no** genera IKM efímero:
+
+| Variable | Uso |
+|----------|-----|
+| `FSTP_NODE_IKM` | 32 bytes raw o 64 hex |
+| `FSTP_NODE_IKM_FILE` | Archivo con 32 bytes o 64 hex (recomendado en K8s secrets) |
+| `FSTP_NODE_DID` | DID del nodo SA (obligatorio) |
+
+Plantilla: [`.env.production.example`](../.env.production.example)
+
+---
+
+## Trusted issuers (registry)
+
+1. El SA registra su propia clave al arrancar.
+2. Cargar emisores desde `FSTP_TRUSTED_ISSUERS_JSON` y/o `config/trusted_issuers.json` en el pod cifrado.
+3. En producción se exigen **≥ 2** entradas (nodo + emisor institucional Ágora).
+4. `FSTP_GOVERNANCE_ISSUER_DID` (o `AGORA_COMMON_ISSUER_DID`) debe estar en el registry para validar el socket de gobernanza.
+
+Bootstrap HTTP (perfil `fstp-production` en Ágora):
+
+- `POST /fstp/admin/trusted-issuers/register` con `X-Pod-Agent-Key`
+- `FstpTrustedIssuerRegistrar` lo invoca al arrancar Spring
+
+---
+
+## Governance socket (AGR-113)
+
+| Variable | Producción |
+|----------|------------|
+| `FSTP_GOVERNANCE_SOCKET_ENABLED` | `true` por defecto si `FSTP_PROFILE=production` |
+| Socket path | `{AGORA_POD_ROOT}/agent.sock` o `FSTP_AGORA_SOCKET_PATH` |
+
+Ágora (`application-fstp-production.properties`):
+
+- `agora.sync-agent.socket-enabled=true`
+- `agora.blocklace.append-enabled=true`
+
+Ver [`AGR-113-agora-governance-socket.md`](./AGR-113-agora-governance-socket.md).
+
+---
+
 ## Migración desde dev
 
 1. Registrar todos los peers con huellas reales ([`PEER-BOOTSTRAP.md`](./PEER-BOOTSTRAP.md)).
-2. Poblar `FSTP_TRUSTED_ISSUERS_JSON` en cada SA.
+2. Poblar `FSTP_TRUSTED_ISSUERS_JSON` en cada SA (nodo + Ágora).
 3. Quitar `FSTP_DEV_*` del `.env` y establecer `FSTP_PROFILE=production`.
-4. Ágora: `outbound-enabled=true`, `stub-mode=false`, URL HTTPS del SA.
-5. Probar `present-passport` y `verify-credential` sin flags dev.
+4. Ágora: `outbound-enabled=true`, `stub-mode=false`, URL HTTPS del SA, trust store JVM.
+5. Activar socket governance + `agora.blocklace.append-enabled=true`.
+6. Probar `present-passport`, `verify-credential` y un evento de gobernanza vía socket.
 
 ---
 
