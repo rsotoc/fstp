@@ -1,18 +1,29 @@
-//! Accountability webhooks to Ágora (whitepaper §4.2 protocol-level privacy audit).
+//! Accountability webhooks to Velyzor (whitepaper §4.2 protocol-level privacy audit).
 //! POST presentations / federation events after SA processes federation messages.
 
 use chrono::Utc;
 use fstp_core::message::EventClass;
 use fstp_core::types::{ContextualId, Sha256Hash};
 
-/// Notify Ágora after an inbound federated present-credential (Phase 2 callback).
+fn velyzor_base_url() -> Option<String> {
+    std::env::var("FSTP_VELYZOR_BASE_URL")
+        .ok()
+        .filter(|u| !u.trim().is_empty())
+        .or_else(|| {
+            std::env::var("FSTP_AGORA_BASE_URL")
+                .ok()
+                .filter(|u| !u.trim().is_empty())
+        })
+}
+
+/// Notify Velyzor after an inbound federated present-credential (Phase 2 callback).
 pub async fn notify_presentation(
     counterpart_url: &str,
     subject_id: &str,
     credential_type: &str,
     subject_cii: &ContextualId,
 ) {
-    let (Ok(base), Ok(key)) = (std::env::var("FSTP_AGORA_BASE_URL"), pod_agent_key()) else {
+    let (Some(base), Ok(key)) = (velyzor_base_url(), pod_agent_key()) else {
         return;
     };
     let url = format!(
@@ -27,17 +38,17 @@ pub async fn notify_presentation(
         "contextDetail": format!("subject_cii={};subject_id={}", subject_cii.0, subject_id),
         "credentialType": credential_type,
     });
-    post_agora(&url, &key, &body).await;
+    post_velyzor(&url, &key, &body).await;
 }
 
-/// Notify Ágora after a federation control block is recorded (Phase 4).
+/// Notify Velyzor after a federation control block is recorded (Phase 4).
 pub async fn notify_federation_event(
     event_class: EventClass,
     instance_cii: &str,
     event_hash: &Sha256Hash,
     link_id: uuid::Uuid,
 ) {
-    let (Ok(base), Ok(key)) = (std::env::var("FSTP_AGORA_BASE_URL"), pod_agent_key()) else {
+    let (Some(base), Ok(key)) = (velyzor_base_url(), pod_agent_key()) else {
         return;
     };
     let url = format!(
@@ -51,10 +62,10 @@ pub async fn notify_federation_event(
         "linkId": link_id.to_string(),
         "occurredAt": Utc::now().to_rfc3339(),
     });
-    post_agora(&url, &key, &body).await;
+    post_velyzor(&url, &key, &body).await;
 }
 
-async fn post_agora(url: &str, key: &str, body: &serde_json::Value) {
+async fn post_velyzor(url: &str, key: &str, body: &serde_json::Value) {
     if let Err(e) = reqwest::Client::new()
         .post(url)
         .header("X-Pod-Agent-Key", key)
@@ -62,10 +73,10 @@ async fn post_agora(url: &str, key: &str, body: &serde_json::Value) {
         .send()
         .await
     {
-        tracing::warn!(url = %url, error = %e, "Agora webhook failed (non-fatal)");
+        tracing::warn!(url = %url, error = %e, "Velyzor webhook failed (non-fatal)");
     }
 }
 
 fn pod_agent_key() -> Result<String, std::env::VarError> {
-    std::env::var("FSTP_POD_AGENT_KEY").or_else(|_| std::env::var("FSTP_AGORA_POD_AGENT_KEY"))
+    std::env::var("FSTP_POD_AGENT_KEY").or_else(|_| std::env::var("FSTP_VELYZOR_POD_AGENT_KEY"))
 }

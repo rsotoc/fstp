@@ -39,7 +39,7 @@ Deploying networks may add message types provided all additions satisfy Property
 4. Document the new type in the module-level doc comment
 5. Open a pull request — the change is visible and auditable to any peer
 
-Platform-specific extensions (e.g. credit transactions in Ágora) belong in the platform crate, not in `fstp-core`. See `crates/fstp-agent` for an example of how to build on top of `fstp-core` without modifying the core enum.
+Platform-specific extensions (e.g. credit transactions in Velyzor) belong in the platform crate, not in `fstp-core`. See `crates/fstp-agent` for an example of how to build on top of `fstp-core` without modifying the core enum.
 
 ## Running tests
 

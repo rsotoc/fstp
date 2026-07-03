@@ -101,7 +101,7 @@ impl GlobalInstanceId {
         Self::derive_cii_from_info(&self.ikm, &context.as_info_bytes())
     }
 
-    /// Subject-scoped CII for portable identity (Ágora HU / Fase 2).
+    /// Subject-scoped CII for portable identity (Velyzor HU / Fase 2).
     ///
     /// Unlinkable across federation links and across subjects: HKDF info is
     /// `federation_context_bytes || subject_id` (length-prefixed UTF-8).

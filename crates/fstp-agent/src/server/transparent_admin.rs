@@ -1,4 +1,4 @@
-//! Admin routes for Ágora Transparent Log (AGR-104 / F01-3).
+//! Admin routes for Velyzor Transparent Log (AGR-104 / F01-3).
 
 use axum::{
     extract::{Query, State},

@@ -38,7 +38,7 @@ use crate::server::verify_credential::{verify_credential, VerifyCredentialInput}
 use crate::server::SharedState;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// POST /rpc/verify-credential  — Ágora outbound contract v1 (no mTLS)
+// POST /rpc/verify-credential  — Velyzor outbound contract v1 (no mTLS)
 // ─────────────────────────────────────────────────────────────────────────────
 
 #[derive(Debug, serde::Deserialize)]
@@ -308,7 +308,7 @@ pub async fn health_handler(State(state): State<SharedState>) -> Response {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// POST /fstp/admin/peers  — runtime peer registration (Hito 1 / Ágora)
+// POST /fstp/admin/peers  — runtime peer registration (Hito 1 / Velyzor)
 // ─────────────────────────────────────────────────────────────────────────────
 
 #[derive(Debug, serde::Deserialize)]
@@ -582,7 +582,7 @@ pub async fn present_credential_handler(
     };
     logging_tx.log_and_complete(record);
 
-    crate::agora_notify::notify_presentation(
+    crate::velyzor_notify::notify_presentation(
         &req.counterpart_url,
         &req.subject_id,
         &format!("{:?}", req.credential_type),
@@ -768,7 +768,7 @@ pub async fn federation_control_handler(
     logging_tx.log_and_complete(record);
 
     let event_hash = Sha256Hash::digest(&signable);
-    crate::agora_notify::notify_federation_event(
+    crate::velyzor_notify::notify_federation_event(
         EventClass::FederationLifecycle,
         &req.from_cii,
         &event_hash,

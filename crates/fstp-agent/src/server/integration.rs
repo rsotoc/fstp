@@ -1,4 +1,4 @@
-//! Ágora ↔ SA platform routes (whitepaper §4 coordination, §5 deployment).
+//! Velyzor ↔ SA platform routes (whitepaper §4 coordination, §5 deployment).
 //! `present-passport`, admin sync — mirrors `docs/contracts/agora-pod-agent-v1.md`.
 
 use axum::{
@@ -40,7 +40,7 @@ pub struct PresentPassportPlatformResponse {
 
 /// **POST /pod-agent/v1/federation/present-passport**
 ///
-/// Called by Ágora (source Pod). Forwards a signed `PresentCredential` to the target peer.
+/// Called by Velyzor (source Pod). Forwards a signed `PresentCredential` to the target peer.
 pub async fn present_passport_handler(
     State(state): State<SharedState>,
     Json(req): Json<PresentPassportPlatformRequest>,

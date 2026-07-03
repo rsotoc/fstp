@@ -75,12 +75,13 @@ pub fn validate_production_issuers(registry: &IssuerRegistry, node_did: &Did) ->
     }
     if registry.len() < 2 {
         return Err(FstpError::PersistenceError(
-            "production requires at least two trusted issuers (node + Ágora institutional) — \
+            "production requires at least two trusted issuers (node + Velyzor institutional) — \
              set FSTP_TRUSTED_ISSUERS_JSON or config/trusted_issuers.json in pod"
                 .into(),
         ));
     }
     let governance_did = std::env::var("FSTP_GOVERNANCE_ISSUER_DID")
+        .or_else(|_| std::env::var("VELYZOR_COMMON_ISSUER_DID"))
         .or_else(|_| std::env::var("AGORA_COMMON_ISSUER_DID"))
         .unwrap_or_default();
     if !governance_did.trim().is_empty() {

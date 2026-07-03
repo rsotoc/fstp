@@ -58,7 +58,7 @@ fn grpc_bind_error(addr: &str, e: std::io::Error) -> Box<dyn std::error::Error> 
     format!("FSTP_GRPC_ADDR {addr} bind failed: {e}").into()
 }
 
-/// Starts the local gRPC server (loopback integration with Ágora JVM).
+/// Starts the local gRPC server (loopback integration with Velyzor JVM).
 pub async fn serve_grpc(addr: &str, state: SharedState) -> Result<(), Box<dyn std::error::Error>> {
     let socket_addr: std::net::SocketAddr = addr
         .parse()

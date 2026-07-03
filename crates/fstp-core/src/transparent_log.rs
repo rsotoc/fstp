@@ -1,4 +1,4 @@
-//! Ágora Transparent Log — hash-linked JSONL audit trail (AGR-104 / F01-3).
+//! Velyzor Transparent Log — hash-linked JSONL audit trail (AGR-104 / F01-3).
 //!
 //! Records federation traffic metadata only (no message content, GII, or PII).
 //! Entries form a tamper-evident chain via `prev_hash` / `entry_hash`.

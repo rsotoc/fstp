@@ -1,8 +1,8 @@
 //! FSTP Sync Agent binary entry point (whitepaper §3.1 SA, §5 deployment).
 //! Launches concurrent mTLS Axum federation server and local gRPC gateway.
 
-mod agora_notify;
-mod agora_socket;
+mod velyzor_notify;
+mod velyzor_socket;
 mod client;
 mod governance_notify;
 mod heartbeat_scheduler;
@@ -213,7 +213,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let shared_state = Arc::new(RwLock::new(server_state));
 
-    agora_socket::spawn(shared_state.clone());
+    velyzor_socket::spawn(shared_state.clone());
     heartbeat_scheduler::spawn(shared_state.clone());
     outbound_worker::spawn(shared_state.clone());
 

@@ -1,6 +1,6 @@
 # Bootstrap automático de peers en el SA (IP-03)
 
-**Índice:** IP-03 en [`INDICE-ESTADO-2026-05.md`](../../docs/tickets/INDICE-ESTADO-2026-05.md) §3.1  
+**Índice:** IP-03 en [`INDICE-ESTADO-2026-05.md`](../../velizor-dev-docs/tickets/INDICE-ESTADO-2026-05.md) §3.1  
 **Whitepaper:** §5 Deployment, §3.2 contextual identity (un `link_id` por relación)  
 **Endpoint SA:** `POST /fstp/admin/peers` ([`handlers.rs`](../crates/fstp-agent/src/server/handlers.rs))
 
@@ -8,7 +8,7 @@
 
 ## Objetivo
 
-Al arrancar Ágora Common, registrar en el **SA local** todos los Pods externos del directorio que tengan metadatos de federación completos, sin reiniciar el agente Rust.
+Al arrancar Velyzor Common, registrar en el **SA local** todos los Pods externos del directorio que tengan metadatos de federación completos, sin reiniciar el agente Rust.
 
 ---
 
@@ -27,14 +27,14 @@ Campos ya existentes usados: `pod_key`, `external_did`, `active`, `is_platform_c
 
 ---
 
-## Algoritmo de arranque (Ágora)
+## Algoritmo de arranque (Velyzor)
 
 Componente: `FstpPeerBootstrapService` (`ApplicationRunner`, `@Order(55)`).
 
-1. Si `agora.fstp.peer-bootstrap.enabled=false` → no-op.
-2. Si `agora.pod-agent.outbound-enabled=false` o URL vacía → log y no-op.
+1. Si `velizor.fstp.peer-bootstrap.enabled=false` → no-op.
+2. Si `velizor.pod-agent.outbound-enabled=false` o URL vacía → log y no-op.
 3. Para cada `pod_directory` con `active=true`, `platform_common=false` y URL + fingerprint + pubkey presentes:
-4. `POST {outbound-base-url}/../fstp/admin/peers` — en la práctica la URL del SA es la base sin sufijo `/pod-agent/v1`; usar propiedad dedicada `agora.fstp.admin-base-url` (default: derivar quitando `/pod-agent/v1` del outbound base).
+4. `POST {outbound-base-url}/../fstp/admin/peers` — en la práctica la URL del SA es la base sin sufijo `/pod-agent/v1`; usar propiedad dedicada `velizor.fstp.admin-base-url` (default: derivar quitando `/pod-agent/v1` del outbound base).
 5. Cuerpo JSON:
 
 ```json
@@ -48,7 +48,7 @@ Componente: `FstpPeerBootstrapService` (`ApplicationRunner`, `@Order(55)`).
 }
 ```
 
-6. Header `X-Pod-Agent-Key` = `agora.pod-agent.inbound-api-key` (misma que `FSTP_POD_AGENT_KEY`).
+6. Header `X-Pod-Agent-Key` = `velizor.pod-agent.inbound-api-key` (misma que `FSTP_POD_AGENT_KEY`).
 7. Idempotencia: respuesta `409` → peer ya registrado (OK).
 
 ### Derivación de `link_id`
@@ -69,7 +69,7 @@ Alineado a [`platform_util::link_id_from_pair`](../crates/fstp-agent/src/platfor
 
 1. Operador del Pod remoto entrega: URL SA, huella TLS, pubkey Ed25519, DID institucional.
 2. INSERT/UPDATE en `pod_directory` (o pantalla admin futura).
-3. Reinicio Ágora o `ApplicationRunner` en cold start registra peers.
+3. Reinicio Velyzor o `ApplicationRunner` en cold start registra peers.
 
 ---
 
@@ -85,9 +85,9 @@ Alineado a [`platform_util::link_id_from_pair`](../crates/fstp-agent/src/platfor
 
 | Variable / property | Descripción |
 |---------------------|-------------|
-| `agora.fstp.peer-bootstrap.enabled` | `true` para ejecutar bootstrap al arranque |
-| `agora.fstp.admin-base-url` | Base del SA, p.ej. `https://fstp-common.internal:8443` |
-| `agora.pod-agent.inbound-api-key` | Clave hacia admin API |
+| `velizor.fstp.peer-bootstrap.enabled` | `true` para ejecutar bootstrap al arranque |
+| `velizor.fstp.admin-base-url` | Base del SA, p.ej. `https://fstp-common.internal:8443` |
+| `velizor.pod-agent.inbound-api-key` | Clave hacia admin API |
 | `FSTP_POD_AGENT_KEY` | Misma clave en el agente |
 
 ---

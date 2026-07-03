@@ -1,4 +1,4 @@
-//! Unix domain socket listener for Ágora → SA governance notifications (AGR-113).
+//! Unix domain socket listener for Velyzor → SA governance notifications (AGR-113).
 
 use std::path::PathBuf;
 use std::time::Duration;
@@ -16,7 +16,7 @@ use crate::governance_notify::process_governance_notification;
 use crate::server::SharedState;
 
 pub mod notification_proto {
-    include!(concat!(env!("OUT_DIR"), "/agora.notification.rs"));
+    include!(concat!(env!("OUT_DIR"), "/velyzor.notification.rs"));
 }
 
 use notification_proto::{GovernanceEventAck, GovernanceEventNotification as WireNotification};
@@ -25,17 +25,26 @@ const MAX_FRAME_BYTES: usize = 1_048_576;
 const CONNECT_TIMEOUT_SECS: u64 = 5;
 const WRITE_TIMEOUT_SECS: u64 = 2;
 
-/// Resolve socket path: `FSTP_AGORA_SOCKET_PATH` or `{AGORA_POD_ROOT}/agent.sock`.
+fn env_socket_path() -> Option<String> {
+    std::env::var("FSTP_VELYZOR_SOCKET_PATH")
+        .ok()
+        .filter(|p| !p.trim().is_empty())
+        .or_else(|| {
+            std::env::var("FSTP_AGORA_SOCKET_PATH")
+                .ok()
+                .filter(|p| !p.trim().is_empty())
+        })
+}
+
+/// Resolve socket path: `FSTP_VELYZOR_SOCKET_PATH` (legacy `FSTP_AGORA_SOCKET_PATH`) or `{VELYZOR_POD_ROOT}/agent.sock`.
 pub fn resolve_socket_path() -> PathBuf {
-    if let Ok(p) = std::env::var("FSTP_AGORA_SOCKET_PATH") {
-        if !p.trim().is_empty() {
-            return PathBuf::from(p);
-        }
+    if let Some(p) = env_socket_path() {
+        return PathBuf::from(p);
     }
-    if let Ok(root) = std::env::var("AGORA_POD_ROOT") {
+    if let Ok(root) = std::env::var("VELYZOR_POD_ROOT") {
         return PathBuf::from(root).join("agent.sock");
     }
-    PathBuf::from("/tmp/agora-sync/agent.sock")
+    PathBuf::from("/tmp/velizor-sync/agent.sock")
 }
 
 /// Spawn the background Unix socket accept loop.
@@ -47,7 +56,7 @@ pub fn spawn(state: SharedState) {
     tokio::spawn(async move {
         let path = resolve_socket_path();
         if let Err(e) = run_listener(state, path.clone()).await {
-            tracing::error!(path = %path.display(), error = %e, "Ágora notification socket stopped");
+            tracing::error!(path = %path.display(), error = %e, "Velyzor notification socket stopped");
         }
     });
 }
@@ -64,7 +73,7 @@ async fn run_listener(
     }
 
     let listener = UnixListener::bind(&path)?;
-    info!(path = %path.display(), "Ágora governance notification socket listening (AGR-113)");
+    info!(path = %path.display(), "Velyzor governance notification socket listening (AGR-113)");
 
     loop {
         let (stream, _) = listener.accept().await?;
@@ -72,7 +81,7 @@ async fn run_listener(
         let path_display = path.display().to_string();
         tokio::spawn(async move {
             if let Err(e) = handle_connection(state_clone, stream).await {
-                warn!(path = %path_display, error = %e, "Ágora socket connection error");
+                warn!(path = %path_display, error = %e, "Velyzor socket connection error");
             }
         });
     }

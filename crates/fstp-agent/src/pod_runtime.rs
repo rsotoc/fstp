@@ -170,7 +170,7 @@ pub fn open_transparent_log() -> Result<Arc<TransparentLog>> {
     } else {
         tracing::info!(
             entries = report.entries_checked,
-            "Ágora Transparent Log ready"
+            "Velyzor Transparent Log ready"
         );
     }
     Ok(Arc::new(log))
@@ -260,7 +260,7 @@ mod tests {
     fn pod_roundtrip_blocklace() {
         let root = temp_root();
         let _ = std::fs::remove_dir_all(&root);
-        std::env::set_var("AGORA_POD_ROOT", root.to_string_lossy().as_ref());
+        std::env::set_var("VELYZOR_POD_ROOT", root.to_string_lossy().as_ref());
         std::env::set_var("FSTP_POD_PASSPHRASE", "test-pass");
 
         let pod = open_pod().unwrap();
@@ -269,7 +269,7 @@ mod tests {
         let loaded = load_blocklace(&pod).unwrap();
         assert!(loaded.frontier().is_empty());
 
-        std::env::remove_var("AGORA_POD_ROOT");
+        std::env::remove_var("VELYZOR_POD_ROOT");
         std::env::remove_var("FSTP_POD_PASSPHRASE");
         let _ = std::fs::remove_dir_all(&root);
     }

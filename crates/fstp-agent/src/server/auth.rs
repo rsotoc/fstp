@@ -36,7 +36,7 @@ pub async fn auth_middleware(
 ) -> Response {
     let path = request.uri().path();
 
-    // Platform integration (Ágora → agent); not a federated peer mTLS session.
+    // Platform integration (Velyzor → agent); not a federated peer mTLS session.
     if path == "/rpc/verify-credential" {
         return next.run(request).await;
     }
@@ -122,12 +122,14 @@ pub fn verify_sender_cii(peer: &PeerIdentity, sender_cii: &ContextualId) -> Resu
 }
 
 fn is_platform_route(path: &str) -> bool {
-    path.starts_with("/pod-agent/v1/") || path.starts_with("/fstp/admin/")
+    path.starts_with("/pod-agent/v1/")
+        || path.starts_with("/fstp/admin/")
+        || path.starts_with("/fstp/crypto/bbs/")
 }
 
 fn expected_platform_key() -> String {
     std::env::var("FSTP_POD_AGENT_KEY")
-        .or_else(|_| std::env::var("FSTP_AGORA_POD_AGENT_KEY"))
+        .or_else(|_| std::env::var("FSTP_VELYZOR_POD_AGENT_KEY"))
         .unwrap_or_else(|_| "dev-pod-agent-key".to_string())
 }
 

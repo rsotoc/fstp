@@ -26,7 +26,7 @@ We aim to acknowledge reports within **5 business days** and provide a remediati
 ## Out of scope
 
 - Compromise of a node by an administrator with legitimate access to the data store (see README, Security model)
-- Issues in downstream platforms (e.g. Ágora) unless they stem from a protocol-level flaw in this repository
+- Issues in downstream platforms (e.g. Velyzor) unless they stem from a protocol-level flaw in this repository
 
 ## Auditing before you federate
 

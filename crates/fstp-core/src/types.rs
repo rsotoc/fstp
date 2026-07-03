@@ -24,7 +24,7 @@ impl Sha256Hash {
         Self(hasher.finalize().into())
     }
 
-    /// Construct from a raw 32-byte digest (e.g. domain EventHash from Ágora).
+    /// Construct from a raw 32-byte digest (e.g. domain EventHash from Velyzor).
     pub fn from_bytes(bytes: [u8; 32]) -> Self {
         Self(bytes)
     }
@@ -142,6 +142,12 @@ impl FederationEndpoint {
             "{}/fstp/federation/identity",
             self.url.trim_end_matches('/')
         )
+    }
+}
+
+impl fmt::Display for FederationEndpoint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.url)
     }
 }
 

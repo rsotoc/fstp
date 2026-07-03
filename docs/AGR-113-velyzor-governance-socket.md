@@ -29,7 +29,7 @@ Defaults:
 
 Env:
 
-- `FSTP_VELYZOR_SOCKET_PATH` — override socket path (legacy: `FSTP_AGORA_SOCKET_PATH`)
+- `FSTP_AGORA_SOCKET_PATH` — override socket path
 - `VELYZOR_POD_ROOT` — pod root; default socket `{root}/agent.sock`
 
 ## Velyzor (JVM)
@@ -40,7 +40,7 @@ Env:
 
 ```properties
 velizor.sync-agent.socket-enabled=true
-velizor.sync-agent.socket-path=/tmp/velizor-sync/agent.sock
+velizor.sync-agent.socket-path=/tmp/agora-sync/agent.sock
 velizor.blocklace.append-enabled=true
 ```
 

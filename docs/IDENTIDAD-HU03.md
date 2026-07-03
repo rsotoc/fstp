@@ -1,14 +1,14 @@
-# HU-03 — Pasaporte a Ágora Common
+# HU-03 — Pasaporte a Velyzor Common
 
-**Índice:** IP-01 en [`INDICE-ESTADO-2026-05.md`](../../docs/tickets/INDICE-ESTADO-2026-05.md) §3.1  
+**Índice:** IP-01 en [`INDICE-ESTADO-2026-05.md`](../../velizor-dev-docs/tickets/INDICE-ESTADO-2026-05.md) §3.1  
 **Whitepaper:** §4 (coordination without disclosure), §5 (deployment con SA)  
-**Contrato:** [`agora-pod-agent-v1.md`](../../docs/contracts/agora-pod-agent-v1.md) — fila HU-03
+**Contrato:** [`agora-pod-agent-v1.md`](../../velizor-dev-docs/contracts/agora-pod-agent-v1.md) — fila HU-03
 
 ---
 
 ## Objetivo
 
-Un ciudadano con credencial emitida por un **Pod externo** activa un **pasaporte** en Ágora Common y accede a grupos `COMMON` cuyas políticas aceptan esa VC, **sin** depositar la credencial en el servidor de forma permanente más allá del snapshot acordado (accountability HU-05).
+Un ciudadano con credencial emitida por un **Pod externo** activa un **pasaporte** en Velyzor Common y accede a grupos `COMMON` cuyas políticas aceptan esa VC, **sin** depositar la credencial en el servidor de forma permanente más allá del snapshot acordado (accountability HU-05).
 
 ---
 
@@ -17,7 +17,7 @@ Un ciudadano con credencial emitida por un **Pod externo** activa un **pasaporte
 ```mermaid
 sequenceDiagram
     participant U as Usuario (wallet UI)
-    participant A as Ágora API
+    participant A as Velyzor API
     participant V as ExternalPodCredentialVerifier
     participant SA as fstp-agent (opcional)
     participant E as Explore / Join Common
@@ -31,7 +31,7 @@ sequenceDiagram
     U->>E: join grupo COMMON con join-presentation
 ```
 
-### Superficie API (Ágora)
+### Superficie API (Velyzor)
 
 | Método | Ruta | Uso |
 |--------|------|-----|
@@ -55,7 +55,7 @@ sequenceDiagram
 | Componente | Rol HU-03 |
 |------------|-----------|
 | `verify_credential.rs` / `POST /rpc/verify-credential` | Segunda opinión criptográfica (emisor en `IssuerRegistry` / `FSTP_TRUSTED_ISSUERS_JSON`) |
-| `agora_notify.rs` | Opcional: notificar presentación tras federación |
+| `velyzor_notify.rs` | Opcional: notificar presentación tras federación |
 
 ---
 
@@ -70,14 +70,14 @@ sequenceDiagram
 | Verificación adicional vía SA cuando producción | 🟡 | `ExternalPodCredentialVerifier` → `POST {SA}/rpc/verify-credential` vía `PodAgentRestClientFactory.createForAgentRoot()` (perfil `fstp-staging`) |
 | Listar y unirse a grupos Common compatibles | ✅ | `listAccessibleCommonCommunities`, explore + join |
 | Registro accountability | ✅ | `CredentialPresentationLogService.recordPassportActivation` |
-| mTLS Ágora ↔ SA en producción | 🔴 → doc | [`MTLS-PRODUCTION.md`](./MTLS-PRODUCTION.md) |
+| mTLS Velyzor ↔ SA en producción | 🔴 → doc | [`MTLS-PRODUCTION.md`](./MTLS-PRODUCTION.md) |
 | Emisor Pod en `FSTP_TRUSTED_ISSUERS_JSON` del SA Common | 🟡 | Operación: registrar DID + pubkey del Pod emisor |
 
 ---
 
 ## DID emisor real (`did:key`)
 
-Tutorial paso a paso: [`docs/tutorials/TUTORIAL-DID-KEY-REAL.md`](../../docs/tutorials/TUTORIAL-DID-KEY-REAL.md)  
+Tutorial paso a paso: [`velizor-dev-docs/tutorials/TUTORIAL-DID-KEY-REAL.md`](../../velizor-dev-docs/tutorials/TUTORIAL-DID-KEY-REAL.md)  
 Atajo local: `cd sos-backend && ./gradlew generatePodDemoDid -PpodKey=pod-demo-alpha`
 
 ---
@@ -86,7 +86,7 @@ Atajo local: `cd sos-backend && ./gradlew generatePodDemoDid -PpodKey=pod-demo-a
 
 1. **Datos:** filas en `pod_directory` con `external_did` del Pod emisor (no Common).
 2. **SA Common:** `FSTP_TRUSTED_ISSUERS_JSON` incluye DID + `pubkeyHex` del Pod.
-3. **Ágora:** `agora.pod-agent.stub-mode=false`, `outbound-enabled=true`, `POD_AGENT_BASE_URL` → SA con mTLS.
+3. **Velyzor:** `velizor.pod-agent.stub-mode=false`, `outbound-enabled=true`, `POD_AGENT_BASE_URL` → SA con mTLS.
 4. **Prueba manual:** activar pasaporte con VC de demo → explorar `?explore=passport` → join a grupo COMMON con política abierta o VC coincidente.
 5. **Logs:** entrada `PASSPORT_ACTIVATION` en `credential_presentation_log`.
 

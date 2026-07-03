@@ -63,6 +63,7 @@ pub async fn register_trusted_issuer_handler(
 pub async fn trusted_issuers_status_handler(State(state): State<SharedState>) -> Response {
     let state_read = state.read().await;
     let governance = std::env::var("FSTP_GOVERNANCE_ISSUER_DID")
+        .or_else(|_| std::env::var("VELYZOR_COMMON_ISSUER_DID"))
         .or_else(|_| std::env::var("AGORA_COMMON_ISSUER_DID"))
         .ok()
         .filter(|s| !s.trim().is_empty());

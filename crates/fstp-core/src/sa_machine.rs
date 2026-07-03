@@ -263,7 +263,7 @@ impl SaTransaction<Composing> {
     ///
     /// The type of `artifact` is `SaOutboundArtifact` — a closed enum.
     /// The compiler statically rejects any D_raw value here (Property 2.1).
-    pub fn compose(self, artifact: SaOutboundArtifact) -> SaTransaction<Transmitting> {
+    pub fn compose(self, _artifact: SaOutboundArtifact) -> SaTransaction<Transmitting> {
         SaTransaction {
             operation_id: self.operation_id,
             started_at: self.started_at,

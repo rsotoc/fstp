@@ -16,6 +16,7 @@ use axum::{
 use serde::Serialize;
 use tokio::sync::RwLock;
 
+use fstp_core::blocklace::BlocklaceStore;
 use crate::server::SharedState;
 
 pub const LOCAL_ADMIN_TOKEN_HEADER: &str = "X-Local-Operator-Token";
@@ -56,7 +57,7 @@ pub struct LocalAdminProbeResponse {
 }
 
 pub fn resolve_pod_root() -> PathBuf {
-    std::env::var("AGORA_POD_ROOT")
+    std::env::var("VELYZOR_POD_ROOT")
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("./pod-data"))
 }
@@ -178,7 +179,7 @@ pub async fn blocklace_snapshot_handler(
 pub async fn residences_handler(State(_state): State<LocalAdminState>) -> Json<serde_json::Value> {
     Json(serde_json::json!({
         "residences": [],
-        "message": "Residence listing is pod-local; full detail via Ágora backend /pod-agent integration."
+        "message": "Residence listing is pod-local; full detail via Velyzor backend /pod-agent integration."
     }))
 }
 

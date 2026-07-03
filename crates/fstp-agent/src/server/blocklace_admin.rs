@@ -1,4 +1,4 @@
-//! Platform admin routes for Blocklace inspection and local append (Ágora bridge).
+//! Platform admin routes for Blocklace inspection and local append (Velyzor bridge).
 
 use axum::{
     extract::State,

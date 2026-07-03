@@ -14,7 +14,7 @@
 //!
 //! ## Platform-specific extensions
 //!
-//! Concepts specific to a particular platform (e.g. credit transactions in Ágora)
+//! Concepts specific to a particular platform (e.g. credit transactions in Velyzor)
 //! belong in that platform's own crate, not here.
 
 use chrono::{DateTime, Utc};

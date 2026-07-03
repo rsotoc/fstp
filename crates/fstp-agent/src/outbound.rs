@@ -100,7 +100,7 @@ pub async fn present_credential_to_peer(
     let mut request = http.post(&url).json(&req);
     if dev_trust_present_credential() {
         let key = std::env::var("FSTP_POD_AGENT_KEY")
-            .or_else(|_| std::env::var("FSTP_AGORA_POD_AGENT_KEY"))
+            .or_else(|_| std::env::var("FSTP_VELYZOR_POD_AGENT_KEY"))
             .unwrap_or_else(|_| "dev-pod-agent-key".to_string());
         request = request.header("X-Pod-Agent-Key", key);
     }
@@ -173,7 +173,7 @@ pub async fn send_identity_event(
     let mut request = http.post(&url).json(&msg);
     if dev_trust_present_credential() {
         let key = std::env::var("FSTP_POD_AGENT_KEY")
-            .or_else(|_| std::env::var("FSTP_AGORA_POD_AGENT_KEY"))
+            .or_else(|_| std::env::var("FSTP_VELYZOR_POD_AGENT_KEY"))
             .unwrap_or_else(|_| "dev-pod-agent-key".to_string());
         request = request.header("X-Pod-Agent-Key", key);
     }

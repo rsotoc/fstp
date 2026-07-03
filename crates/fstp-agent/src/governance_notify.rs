@@ -1,4 +1,4 @@
-//! Process `GovernanceEventNotification` from Ágora (AGR-113).
+//! Process `GovernanceEventNotification` from Velyzor (AGR-113).
 
 use fstp_core::governance_notification::{GovernanceEventNotification, GovernanceNotifyError};
 use fstp_core::types::{Did, PublicKey, RejectionReason};
@@ -100,6 +100,7 @@ fn rejection_code(reason: RejectionReason) -> String {
 async fn resolve_verifying_pubkey(state: &SharedState) -> PublicKey {
     let state_read = state.read().await;
     if let Ok(did) = std::env::var("FSTP_GOVERNANCE_ISSUER_DID")
+        .or_else(|_| std::env::var("VELYZOR_COMMON_ISSUER_DID"))
         .or_else(|_| std::env::var("AGORA_COMMON_ISSUER_DID"))
     {
         if !did.trim().is_empty() {
