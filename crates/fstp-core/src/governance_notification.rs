@@ -1,6 +1,6 @@
 //! Governance event notification DTO validation (AGR-113 / F01-5).
 //!
-//! Mirrors `schema/gen-notification.proto` without protobuf in this crate.
+//! Mirrors `schema/gen-notification.proto` in this crate without protobuf here.
 
 use ed25519_dalek::Verifier;
 
@@ -63,7 +63,7 @@ impl GovernanceNotifyError {
 
 impl GovernanceEventNotification {
     pub fn validate_schema(&self) -> Result<(), GovernanceNotifyError> {
-        validate_proto_schema_text(include_str!("../../../schema/gen-notification.proto"))?;
+        validate_proto_schema_text(include_str!("../schema/gen-notification.proto"))?;
 
         if self.event_class.trim().is_empty() {
             return Err(GovernanceNotifyError::SchemaViolation(
@@ -193,7 +193,7 @@ mod tests {
     #[test]
     fn proto_schema_has_no_forbidden_fields() {
         assert!(validate_proto_schema_text(include_str!(
-            "../../../schema/gen-notification.proto"
+            "../schema/gen-notification.proto"
         ))
         .is_ok());
     }

@@ -3,6 +3,10 @@ name        = "fstp-core"
 version     = "0.1.0"
 edition     = "2021"
 description = "Federated Sovereign Transport Protocol — protocol primitives (Blocklace, contextual identity, synchronization agent)"
+authors     = [
+  "Ramón Soto C. <ramon.soto@unison.mx>",
+  "Liz Soto",
+]
 license     = "Apache-2.0"
 repository  = "https://github.com/rsotoc/fstp"
 homepage    = "https://github.com/rsotoc/fstp"
@@ -10,6 +14,15 @@ documentation = "https://github.com/rsotoc/fstp/tree/main/docs"
 readme      = "README.md"
 keywords    = ["federation", "privacy", "blocklace", "did", "credentials"]
 categories  = ["cryptography", "data-structures"]
+include = [
+  "src/**/*",
+  "schema/**/*",
+  "examples/**/*",
+  "benches/**/*",
+  "tests/**/*",
+  "README.md",
+  "LICENSE",
+]
 
 [lib]
 name = "fstp_core"

@@ -1,22 +1,24 @@
 syntax = "proto3";
 
-// AGR-113 — Velyzor (JVM) → Sync Agent (Rust) boundary DTO.
-// Canonical copy: crates/fstp-core/schema/gen-notification.proto
+// FSTP governance notification boundary DTO (platform → synchronization agent).
+// Invariant: no D_raw fields; event content never crosses this interface.
 package velyzor.notification;
 
 option java_multiple_files = true;
 option java_package = "com.velyzor.fstp.notification";
 
+// Transformation DTO: only hashes and aggregate metadata (Table 2 / EventHash).
 message GovernanceEventNotification {
   string event_class       = 1;
   int64  timestamp_utc_ms  = 2;
   string process_id        = 3;
   bool   quorum_met        = 4;
   uint32 participant_count = 5;
-  bytes  content_hash      = 6;
-  bytes  instance_signature = 7;
+  bytes  content_hash      = 6;  // SHA-256 (32 bytes)
+  bytes  instance_signature = 7; // Ed25519 over content_hash
 }
 
+// Optional ack returned by the SA after processing (length-framed on same socket).
 message GovernanceEventAck {
   bool   accepted        = 1;
   string block_hash_hex  = 2;

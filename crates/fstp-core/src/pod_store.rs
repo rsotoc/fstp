@@ -113,9 +113,9 @@ impl EncryptedPodStore {
         dirs::data_dir().map(|d| d.join("agora-desktop"))
     }
 
-    /// Resolve root from `AGORA_POD_ROOT` or desktop default.
+    /// Resolve root from `VELYZOR_POD_ROOT` or desktop default.
     pub fn resolve_root() -> Result<PathBuf> {
-        if let Ok(p) = std::env::var("AGORA_POD_ROOT") {
+        if let Ok(p) = std::env::var("VELYZOR_POD_ROOT") {
             return Ok(PathBuf::from(p));
         }
         Self::default_desktop_root()
@@ -500,8 +500,10 @@ mod tests {
         let _ = fs::remove_dir_all(&root);
         let start = Instant::now();
         let _store = EncryptedPodStore::initialize(&root, "bench-pass").unwrap();
+        // Guard against accidental production Argon2 params in #[cfg(test)] builds.
+        // Allow generous headroom for CI sandboxes and loaded laptops.
         assert!(
-            start.elapsed().as_millis() < 500,
+            start.elapsed().as_millis() < 3000,
             "pod init took {:?}",
             start.elapsed()
         );

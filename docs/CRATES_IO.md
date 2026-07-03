@@ -1,6 +1,14 @@
 # Publishing `fstp-core` on crates.io
 
-Do this after the GitHub repository exists and `cargo test --workspace` passes on `main`.
+Do this after the GitHub repository is **public** and `cargo test --workspace` passes on `main`.
+
+## Package checklist (v0.1.0)
+
+- [ ] `crates/fstp-core/schema/gen-notification.proto` present (included in tarball)
+- [ ] `authors` and `LICENSE` in `crates/fstp-core/Cargo.toml`
+- [ ] `cargo publish -p fstp-core --dry-run` completes **verify** without errors
+- [ ] Git tag `v0.1.0` matches `version` in `Cargo.toml`
+- [ ] No uncommitted changes on the commit you publish from
 
 ## Prerequisites
 
