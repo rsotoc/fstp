@@ -5,7 +5,8 @@ type: software
 authors:
   - family-names: "Soto"
     given-names: "Ramón"
-    # Update affiliation and ORCID before public release
+  - family-names: "Soto"
+    given-names: "Liz"
 license: Apache-2.0
 repository-code: "https://github.com/rsotoc/fstp"
 url: "https://github.com/rsotoc/fstp"
@@ -19,9 +20,12 @@ keywords:
   - synchronization
 preferred-citation:
   type: article
-  title: "Federated Sovereign Transport Protocol: Verifiable Coordination Without Disclosure"
+  title: "Federated Sovereign Transport Protocol (FSTP): Verifiable Coordination Without Disclosure"
   authors:
     - family-names: "Soto"
       given-names: "Ramón"
+    - family-names: "Soto"
+      given-names: "Liz"
   year: 2026
-  notes: "Technical whitepaper source in docs/FSTP-techPaper.tex; update with venue and DOI when published."
+  doi: 10.48550/arXiv.2607.00213
+  url: "https://arxiv.org/abs/2607.00213"

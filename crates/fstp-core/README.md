@@ -1,24 +1,38 @@
 # fstp-core
 
-Protocol primitives for the **Federated Sovereign Transport Protocol (FSTP)**:
+**Verifiable coordination without disclosure.**
 
-- **Synchronization Agent** — closed `FstpMessage` output enumeration (synchronization confinement)
-- **Contextual identity** — HKDF-derived CIIs, unlinkable across federation links
-- **Blocklace** — tamper-evident DAG with O(Δ) sync and erasure-safe dangling pointers
+Protocol primitives for the [Federated Sovereign Transport Protocol (FSTP)](https://github.com/rsotoc/fstp):
 
-## Usage
+| Primitive | Module | Role |
+|-----------|--------|------|
+| **Synchronization Agent** | `message`, `sa_machine` | Closed `FstpMessage` output enum — compile-time confinement |
+| **Contextual identity** | `identity` | HKDF-derived CIIs, unlinkable across federation links |
+| **Blocklace** | `blocklace` | Tamper-evident DAG; O(Δ) sync; erasure-safe dangling pointers |
+
+## Quick start
 
 ```toml
 [dependencies]
 fstp-core = "0.1"
-# or from git until crates.io publish:
-# fstp-core = { git = "https://github.com/rsotoc/fstp", tag = "v0.1.0" }
 ```
 
-## Auditing
+```bash
+cargo run --example two_nodes -p fstp-core
+```
 
-Before federating with a peer, review `src/message.rs` and the git tag you deploy. See the [repository CONTRIBUTING guide](https://github.com/rsotoc/fstp/blob/main/CONTRIBUTING.md).
+The `two_nodes` example runs a full Blocklace sync round with no HTTP, TLS, or network stack.
+
+## Auditing the confinement boundary
+
+Before federating with a peer, review [`src/message.rs`](src/message.rs) at the git tag you deploy. If `FstpMessage` has no `D_raw` fields and the crate compiles, confinement holds for all executions (see [arXiv:2607.00213](https://arxiv.org/abs/2607.00213), §3.1).
+
+Full audit procedure: [CONTRIBUTING.md](https://github.com/rsotoc/fstp/blob/main/CONTRIBUTING.md).
+
+## API stability
+
+`0.1.x` tracks the protocol described in the FSTP paper. Minor releases may extend `FstpMessage` variants; patch releases are bug fixes only.
 
 ## License
 
-Apache-2.0
+Apache-2.0 — see [LICENSE](LICENSE).

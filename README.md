@@ -8,10 +8,13 @@
 
 [![CI](https://github.com/rsotoc/fstp/actions/workflows/ci.yml/badge.svg)](https://github.com/rsotoc/fstp/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![arXiv](https://img.shields.io/badge/arXiv-2607.00213-b31b1b.svg)](https://arxiv.org/abs/2607.00213)
 
 **Verifiable coordination without disclosure.**
 
 FSTP is a synchronization boundary and transport layer for federated networks where each node may hold sensitive data under its own custody—yet still coordinate with other pods. The protocol makes **data confinement a structural property**: what may leave the node is defined by a closed, auditable message vocabulary, not by operational policy alone.
+
+**Technical paper:** [arXiv:2607.00213](https://arxiv.org/abs/2607.00213) · [PDF](https://arxiv.org/pdf/2607.00213)
 
 <p align="center">
   <img src="docs/fgdp_architecture.svg" alt="FSTP architecture: platform, SA boundary, federation network" width="720"/>
@@ -118,15 +121,15 @@ Returns chain integrity, frontier size, peer count, and audit record count.
 
 Signed frontier exchange uses `NodeSigner` (`fstp-core/src/crypto.rs`). Trusted issuers: `FSTP_TRUSTED_ISSUERS_JSON`. Use `FSTP_GRPC_TRUST_CALLER_PUBKEY=true` **only** in local development.
 
-## Phase 3 — Ágora integration & active sync
+## Phase 3 — Velyzor integration & active sync
 
 | Endpoint | Auth | Purpose |
 |----------|------|---------|
-| `POST /pod-agent/v1/federation/present-passport` | `X-Pod-Agent-Key` | HU-06: Ágora → source SA → target `present-credential` |
+| `POST /pod-agent/v1/federation/present-passport` | `X-Pod-Agent-Key` | HU-06: Velyzor → source SA → target `present-credential` |
 | `POST /fstp/admin/sync?link_id=…` | `X-Pod-Agent-Key` | Trigger O(Δ) frontier sync with a registered peer |
 | `POST /fstp/admin/peers` | `X-Pod-Agent-Key` | Register peer DID, endpoint, TLS fingerprint |
 
-Configure Ágora with `agora.pod-agent.outbound-base-url=https://your-sa/pod-agent/v1` (not the Java stub path). Register federation peers on each SA and add the source DID to the target's `FSTP_TRUSTED_ISSUERS_JSON`.
+Configure Velyzor with `velizor.pod-agent.outbound-base-url=https://your-sa/pod-agent/v1` (not the Java stub path). Register federation peers on each SA and add the source DID to the target's `FSTP_TRUSTED_ISSUERS_JSON`.
 
 **Local dev flags** (never in production): `FSTP_DEV_INSECURE_OUTBOUND`, `FSTP_DEV_TRUST_PRESENT_CREDENTIAL` — see `.env.example`. Set `FSTP_PROFILE=production` to abort startup if any dev flag is enabled ([`docs/MTLS-PRODUCTION.md`](docs/MTLS-PRODUCTION.md)).
 
@@ -138,10 +141,10 @@ Configure Ágora with `agora.pod-agent.outbound-base-url=https://your-sa/pod-age
 |----------|------|---------|
 | `POST /pod-agent/v1/residences/grant` | `X-Pod-Agent-Key` | HU-04: derive `subject_cii` + Blocklace `MembershipChange` |
 | `POST /pod-agent/v1/residences/revoke` | `X-Pod-Agent-Key` | HU-04: record revocation in Blocklace |
-| *(outbound)* `POST …/federation/events` | `X-Pod-Agent-Key` → Ágora | After `federation/control`, SA notifies Ágora |
+| *(outbound)* `POST …/federation/events` | `X-Pod-Agent-Key` → Velyzor | After `federation/control`, SA notifies Velyzor |
 | `FSTP_SYNC_INTERVAL_SECS` | — | Background O(Δ) sync with all registered peers |
 
-Ágora calls `PodResidenceOutboundClient` → `/residences/grant` on the local SA when `stub-mode=false`.
+Velyzor calls `PodResidenceOutboundClient` → `/residences/grant` on the local SA when `stub-mode=false`.
 
 ## Use as a library
 
@@ -161,11 +164,29 @@ Platform-specific HTTP contracts belong in the integrating application; FSTP doc
 
 ## Documentation
 
+- **[arXiv:2607.00213](https://arxiv.org/abs/2607.00213)** — technical paper (preprint)
 - **[docs/README.md](docs/README.md)** — whitepaper source, figures, PDF build
 - **[docs/GITHUB_SETUP.md](docs/GITHUB_SETUP.md)** — first-time private repo on GitHub
 - **[docs/CRATES_IO.md](docs/CRATES_IO.md)** — publish `fstp-core` on crates.io
-- **[docs/FSTP-techPaper.tex](docs/FSTP-techPaper.tex)** — technical paper (LaTeX)
+- **[docs/FSTP-techPaper.tex](docs/FSTP-techPaper.tex)** — LaTeX source (mirrors arXiv)
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — audit procedure for `message.rs`
+
+## Citing
+
+Software metadata: [`CITATION.cff`](CITATION.cff).
+
+```bibtex
+@article{soto2026fstp,
+  title   = {Federated Sovereign Transport Protocol ({FSTP}): Verifiable Coordination Without Disclosure},
+  author  = {Soto, Ram{\'o}n and Soto, Liz},
+  year    = {2026},
+  eprint  = {2607.00213},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CR},
+  doi     = {10.48550/arXiv.2607.00213},
+  url     = {https://arxiv.org/abs/2607.00213}
+}
+```
 
 ## Security model
 
@@ -177,9 +198,9 @@ Report vulnerabilities per **[SECURITY.md](SECURITY.md)**.
 
 | Channel | Status |
 |---------|--------|
-| **GitHub** ([rsotoc/fstp](https://github.com/rsotoc/fstp)) | Private bootstrap → public release when ready |
-| **[crates.io](https://crates.io/)** | Planned (`fstp-core`, then agent tooling) |
-| **Academic paper** | Source in `docs/`; citation via `CITATION.cff` |
+| **arXiv** | [2607.00213](https://arxiv.org/abs/2607.00213) |
+| **GitHub** ([rsotoc/fstp](https://github.com/rsotoc/fstp)) | Public release + tag `v0.1.0` aligned with paper |
+| **[crates.io](https://crates.io/crates/fstp-core)** | Publish `fstp-core` after public tag |
 
 ## Contributing
 
