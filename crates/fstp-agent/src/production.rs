@@ -126,6 +126,15 @@ pub fn is_production_profile() -> bool {
         .unwrap_or(false)
 }
 
+/// When true, the federation TLS listener rejects handshakes without a client
+/// certificate signed by `FSTP_CLIENT_CA_PATH` (strict mTLS at L5).
+pub fn client_cert_required() -> bool {
+    if is_production_profile() {
+        return true;
+    }
+    env_is_true("FSTP_REQUIRE_CLIENT_CERT")
+}
+
 /// Governance socket defaults on in production unless explicitly disabled.
 pub fn governance_socket_enabled() -> bool {
     match std::env::var("FSTP_GOVERNANCE_SOCKET_ENABLED") {

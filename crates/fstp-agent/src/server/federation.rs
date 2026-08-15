@@ -345,6 +345,26 @@ pub fn build_router(state: SharedState) -> Router {
             "/fstp/crypto/bbs/verify-proof",
             post(super::bbs_crypto::bbs_verify_proof_handler),
         )
+        .route(
+            "/fstp/crypto/bbs/ietf/status",
+            get(super::bbs_ietf_crypto::bbs_ietf_status_handler),
+        )
+        .route(
+            "/fstp/crypto/bbs/ietf/keypair",
+            post(super::bbs_ietf_crypto::bbs_ietf_keypair_handler),
+        )
+        .route(
+            "/fstp/crypto/bbs/ietf/sign",
+            post(super::bbs_ietf_crypto::bbs_ietf_sign_handler),
+        )
+        .route(
+            "/fstp/crypto/bbs/ietf/derive-proof",
+            post(super::bbs_ietf_crypto::bbs_ietf_derive_proof_handler),
+        )
+        .route(
+            "/fstp/crypto/bbs/ietf/verify-proof",
+            post(super::bbs_ietf_crypto::bbs_ietf_verify_proof_handler),
+        )
         .layer(TraceLayer::new_for_http())
         .layer(TimeoutLayer::new(Duration::from_secs(30)))
         .with_state(state)
@@ -394,14 +414,28 @@ fn build_server_config(
                 .add(cert.into_owned())
                 .map_err(|e| FstpError::TlsError(format!("add client CA: {e}")))?;
         }
-        let verifier = WebPkiClientVerifier::builder(roots.into())
-            .allow_unauthenticated()
-            .build()
-            .map_err(|e| FstpError::TlsError(format!("client verifier: {e}")))?;
-        tracing::info!(
-            ca = %ca_path.display(),
-            "mTLS: optional client certificate (peer routes enforce fingerprint in middleware)"
-        );
+        let verifier_builder = WebPkiClientVerifier::builder(roots.into());
+        let verifier = if crate::production::client_cert_required() {
+            verifier_builder
+                .build()
+                .map_err(|e| FstpError::TlsError(format!("client verifier: {e}")))?
+        } else {
+            verifier_builder
+                .allow_unauthenticated()
+                .build()
+                .map_err(|e| FstpError::TlsError(format!("client verifier: {e}")))?
+        };
+        if crate::production::client_cert_required() {
+            tracing::info!(
+                ca = %ca_path.display(),
+                "mTLS: client certificate required at TLS handshake"
+            );
+        } else {
+            tracing::info!(
+                ca = %ca_path.display(),
+                "mTLS: optional client certificate (peer routes enforce fingerprint in middleware)"
+            );
+        };
         rustls::ServerConfig::builder()
             .with_client_cert_verifier(verifier)
             .with_single_cert(certs, key)

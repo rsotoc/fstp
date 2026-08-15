@@ -56,6 +56,7 @@ automerge = { workspace = true }
 flate2    = { workspace = true }
 sharks    = { workspace = true }
 bbs = "0.4.1"
+zkryptium = { version = "0.6.2", default-features = false, features = ["bbsplus"] }
 
 [dev-dependencies]
 criterion = { workspace = true }

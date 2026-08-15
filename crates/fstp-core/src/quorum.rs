@@ -137,7 +137,8 @@ pub fn shamir_combine(submissions: &[QuorumShareSubmission], threshold: u8) -> R
     let recovered = sharks.recover(&shares).map_err(|e| {
         FstpError::PersistenceError(format!("Shamir recovery failed: {e}"))
     })?;
-    let arr = <[u8; 32]>::try_from(recovered.as_ref()).map_err(|_| {
+    let recovered_bytes: &[u8] = recovered.as_ref();
+    let arr: [u8; 32] = recovered_bytes.try_into().map_err(|_| {
         FstpError::PersistenceError("recovered secret must be 32 bytes".into())
     })?;
     Ok(arr)

@@ -3,6 +3,7 @@
 // 1. Declaramos los submódulos que están dentro de la carpeta server/
 mod auth;
 pub mod bbs_crypto;
+pub mod bbs_ietf_crypto;
 pub mod blocklace_admin;
 pub mod federation;
 pub mod local_admin;

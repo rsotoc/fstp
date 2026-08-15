@@ -1,11 +1,12 @@
-//! BBS+ crypto HTTP API (AGR-DT-274) — delegates to fstp-core.
+//! Legacy Ursa BBS+ HTTP API — **disabled** (410 Gone). Use `/fstp/crypto/bbs/ietf/*`.
 
-use axum::{http::StatusCode, response::{IntoResponse, Response}, Json};
-use fstp_core::bbs_plus::{
-    derive_proof, generate_key_pair, sign_messages, verify_proof, BbsDeriveProofRequest,
-    BbsSignRequest, BbsVerifyProofRequest,
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    Json,
 };
 use serde::Deserialize;
+use serde_json::json;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -13,47 +14,39 @@ pub struct GenerateKeyPairQuery {
     pub message_count: Option<usize>,
 }
 
-/// **POST /fstp/crypto/bbs/keypair** — issuer key generation for N messages.
-pub async fn bbs_keypair_handler(Json(query): Json<GenerateKeyPairQuery>) -> Response {
-    let count = query.message_count.unwrap_or(8).clamp(1, 64);
-    match generate_key_pair(count) {
-        Ok(keys) => (StatusCode::OK, Json(keys)).into_response(),
-        Err(e) => (
-            StatusCode::BAD_REQUEST,
-            Json(serde_json::json!({ "error": e.to_string() })),
-        )
-            .into_response(),
-    }
-}
-
-/// **POST /fstp/crypto/bbs/sign**
-pub async fn bbs_sign_handler(Json(req): Json<BbsSignRequest>) -> Response {
-    match sign_messages(&req) {
-        Ok(resp) => (StatusCode::OK, Json(resp)).into_response(),
-        Err(e) => error_response(e.to_string()),
-    }
-}
-
-/// **POST /fstp/crypto/bbs/derive-proof**
-pub async fn bbs_derive_proof_handler(Json(req): Json<BbsDeriveProofRequest>) -> Response {
-    match derive_proof(&req) {
-        Ok(bundle) => (StatusCode::OK, Json(bundle)).into_response(),
-        Err(e) => error_response(e.to_string()),
-    }
-}
-
-/// **POST /fstp/crypto/bbs/verify-proof**
-pub async fn bbs_verify_proof_handler(Json(req): Json<BbsVerifyProofRequest>) -> Response {
-    match verify_proof(&req) {
-        Ok(resp) => (StatusCode::OK, Json(resp)).into_response(),
-        Err(e) => error_response(e.to_string()),
-    }
-}
-
-fn error_response(message: String) -> Response {
+fn ursa_gone() -> Response {
     (
-        StatusCode::BAD_REQUEST,
-        Json(serde_json::json!({ "error": message })),
+        StatusCode::GONE,
+        Json(json!({
+            "success": false,
+            "error": "BBS_URSA_GONE",
+            "message": "Ursa BBS path disabled; use IETF CFRG routes under /fstp/crypto/bbs/ietf/",
+            "ietfStatusPath": "/fstp/crypto/bbs/ietf/status",
+            "ietfKeypairPath": "/fstp/crypto/bbs/ietf/keypair",
+            "ietfSignPath": "/fstp/crypto/bbs/ietf/sign",
+            "ietfDeriveProofPath": "/fstp/crypto/bbs/ietf/derive-proof",
+            "ietfVerifyProofPath": "/fstp/crypto/bbs/ietf/verify-proof"
+        })),
     )
         .into_response()
+}
+
+/// **POST /fstp/crypto/bbs/keypair** — Gone (Ursa retired).
+pub async fn bbs_keypair_handler(Json(_query): Json<GenerateKeyPairQuery>) -> Response {
+    ursa_gone()
+}
+
+/// **POST /fstp/crypto/bbs/sign** — Gone (Ursa retired).
+pub async fn bbs_sign_handler(Json(_req): Json<serde_json::Value>) -> Response {
+    ursa_gone()
+}
+
+/// **POST /fstp/crypto/bbs/derive-proof** — Gone (Ursa retired).
+pub async fn bbs_derive_proof_handler(Json(_req): Json<serde_json::Value>) -> Response {
+    ursa_gone()
+}
+
+/// **POST /fstp/crypto/bbs/verify-proof** — Gone (Ursa retired).
+pub async fn bbs_verify_proof_handler(Json(_req): Json<serde_json::Value>) -> Response {
+    ursa_gone()
 }

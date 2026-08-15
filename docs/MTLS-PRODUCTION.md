@@ -50,10 +50,10 @@ Recomendación producción:
 
 | Ruta | Auth en `FSTP_PROFILE=production` |
 |------|-----------------------------------|
-| `GET /fstp/admin/blocklace/status` | `X-Pod-Agent-Key` (ruta plataforma) — usar en probes/smoke |
+| `GET /fstp/admin/blocklace/status` | mTLS cliente (CA piloto) + `X-Pod-Agent-Key` — usar en probes/smoke |
 | `GET /fstp/health` | Certificado cliente mTLS registrado en `POST /fstp/admin/peers` |
 
-Un `curl` solo con `--cacert` a `/fstp/health` devuelve **401** (comportamiento esperado).
+Con `FSTP_REQUIRE_CLIENT_CERT=true` o `FSTP_PROFILE=production`, un `curl` solo con `--cacert` **falla en el handshake TLS** (sin cert de cliente). Con mTLS opcional (dev), devuelve **401** en capa HTTP.
 
 ---
 

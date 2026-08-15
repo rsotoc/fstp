@@ -27,6 +27,7 @@
 //! — a change that is visible and auditable in this open-source repository.
 
 pub mod audit;
+pub mod bbs_ietf;
 pub mod bbs_plus;
 pub mod blocklace;
 pub mod crypto;
@@ -53,6 +54,15 @@ pub use bbs_plus::{
     canonical_messages_from_subject, derive_proof, generate_key_pair, sign_messages, verify_proof,
     BbsDeriveProofRequest, BbsDerivedProofBundle, BbsKeyPairHex, BbsSignRequest, BbsSignResponse,
     BbsVerifyProofRequest, BbsVerifyProofResponse,
+};
+
+pub use bbs_ietf::{
+    capability_metadata as bbs_ietf_capability_metadata, derive_proof as ietf_derive_proof,
+    generate_key_pair as ietf_generate_key_pair, sign_messages as ietf_sign_messages,
+    verify_proof as ietf_verify_proof, BbsIetfDeriveProofRequest, BbsIetfDerivedProofBundle,
+    BbsIetfKeyPairHex, BbsIetfSignRequest, BbsIetfSignResponse, BbsIetfVerifyProofRequest,
+    BbsIetfVerifyProofResponse, CRYPTO_PROFILE as BBS_IETF_CRYPTO_PROFILE,
+    PROOF_TYPE as BBS_IETF_PROOF_TYPE,
 };
 
 pub use blocklace::{
