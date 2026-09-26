@@ -35,16 +35,16 @@ Cada módulo Rust lleva un encabezado `//!` con la misma referencia de sección;
 
 | Archivo | Rol en código | Whitepaper |
 |---------|---------------|------------|
-| [`message.rs`](../crates/fstp-core/src/message.rs) | Enumeración cerrada `FstpMessage` — vocabulario emitible | §3.1, Definition (synchronization confinement) |
-| [`sa_machine.rs`](../crates/fstp-core/src/sa_machine.rs) | Máquina de estados del SA (`Idle` → `Validating` → …) | §3.1, Property 2.1 |
-| [`handlers.rs`](../crates/fstp-agent/src/server/handlers.rs) | HTTP `/fstp/sync/*`, `present-credential`, `federation/control` | §3.1 |
+| [`message.rs`](../crates/fstp-core/src/message.rs) | Enumeración cerrada `FstpMessage`; `UsageScope` en el sobre de presentación | §3.1, confinamiento y reemisión acotada |
+| [`sa_machine.rs`](../crates/fstp-core/src/sa_machine.rs) | Máquina de estados; `compose` (primera emisión) y `compose_reemission` | §3.1, Property 2.1 y bounded re-emission |
+| [`handlers.rs`](../crates/fstp-agent/src/server/handlers.rs) | HTTP `/fstp/sync/*`, `present-credential` (guarda el alcance recibido) | §3.1 |
+| [`integration.rs`](../crates/fstp-agent/src/server/integration.rs) | `present-passport` registra el alcance y rehúsa un reenvío fuera de él; resto de `/pod-agent/v1/*` | §3.1, reemisión acotada, §4 |
 | [`server/federation.rs`](../crates/fstp-agent/src/server/federation.rs) | `ServerState`, registro de peers, router Axum mTLS | §3.1 |
 | [`server/auth.rs`](../crates/fstp-agent/src/server/auth.rs) | mTLS peer auth + rutas plataforma (`X-Pod-Agent-Key`) | §3.1, §5 Deployment |
 | [`server/grpc.rs`](../crates/fstp-agent/src/server/grpc.rs) | Gateway gRPC local (`VerifyCredential`, …) | §3.1 |
 | [`server/verify_credential.rs`](../crates/fstp-agent/src/server/verify_credential.rs) | Verificación VC / emisor (HU-03 Velyzor) | §3.1, §4 Case study |
 | [`registry.rs`](../crates/fstp-core/src/registry.rs) | `IssuerRegistry` — DIDs confiables | §3.1 |
-| [`integration.rs`](../crates/fstp-agent/src/server/integration.rs) | Rutas `/pod-agent/v1/*`, `present-passport`, admin sync | §3.1, §4 |
-| [`outbound.rs`](../crates/fstp-agent/src/outbound.rs) | Cliente HTTP firmado hacia peer (`present-credential`) | §3.1 |
+| [`outbound.rs`](../crates/fstp-agent/src/outbound.rs) | Cliente HTTP firmado hacia peer (`present-credential` incluye `usage_scope`) | §3.1 |
 | [`residence.rs`](../crates/fstp-agent/src/residence.rs) | Grant/revoke residencia (CII por HKDF) | §3.1, §4 |
 | [`platform_util.rs`](../crates/fstp-agent/src/platform_util.rs) | `link_id_from_pair` determinista | §3.1 |
 | [`production.rs`](../crates/fstp-agent/src/production.rs) | Perfil `FSTP_PROFILE=production` — rechaza flags dev | §5 Deployment |

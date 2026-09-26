@@ -18,6 +18,7 @@ cat crates/fstp-core/src/message.rs
 
 # Verify that:
 # - FstpMessage has exactly 4 variants (Table 2 of the paper)
+# - Re-emission goes through SaTransaction::compose_reemission (sa_machine.rs), not a new variant
 # - No variant has a field that could carry raw content
 #   (member records, deliberation text, vote data, etc.)
 # - D_raw types are not imported in this file

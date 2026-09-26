@@ -8,7 +8,11 @@ use axum::{
     Json,
 };
 use fstp_core::identity::FederationContext;
-use fstp_core::types::{FederationEndpoint, FstpError, LinkId};
+use fstp_core::message::UsageScope;
+use fstp_core::sa_machine::{
+    FederationControlType, Idle, SaOutboundArtifact, SaTransaction, ValidationContext,
+};
+use fstp_core::types::{ContextualId, Ed25519Sig, FederationEndpoint, FstpError, LinkId};
 use serde::{Deserialize, Serialize};
 
 use crate::outbound::{build_http_client, present_credential_to_peer};
@@ -26,6 +30,8 @@ pub struct PresentPassportPlatformRequest {
     pub target_external_did: String,
     pub target_agent_url: Option<String>,
     pub credential_external_id: Option<String>,
+    #[serde(default)]
+    pub authorized_recipients: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -100,6 +106,50 @@ pub async fn present_passport_handler(
     };
 
     let subject_id = format!("{}:{}", req.source_subject_cii, req.citizen_id);
+    let recipient = ContextualId::new(req.target_external_did.trim());
+    let artifact_key = req
+        .credential_external_id
+        .clone()
+        .filter(|s| !s.trim().is_empty())
+        .unwrap_or_else(|| format!("passport:{}:{}", req.source_pod_key, req.citizen_id));
+
+    let usage_scope = {
+        let mut state_write = state.write().await;
+        if let Some(existing) = state_write.custody.get(&artifact_key).cloned() {
+            if !existing.authorizes(&recipient) {
+                return platform_json(PresentPassportPlatformResponse {
+                    accepted: false,
+                    target_subject_cii: None,
+                    error_message: Some("REEMISSION_REFUSED".into()),
+                    stub_response: false,
+                    contract_version: CONTRACT_VERSION,
+                });
+            }
+            let audit = state_write.audit.clone();
+            drop(state_write);
+            if let Err(reason) = refuse_unless_scope_allows(audit, &existing, &recipient) {
+                return platform_json(PresentPassportPlatformResponse {
+                    accepted: false,
+                    target_subject_cii: None,
+                    error_message: Some(reason),
+                    stub_response: false,
+                    contract_version: CONTRACT_VERSION,
+                });
+            }
+            existing
+        } else {
+            let mut authorized = vec![recipient.clone()];
+            for extra in &req.authorized_recipients {
+                let id = ContextualId::new(extra.trim());
+                if !id.0.is_empty() && !authorized.iter().any(|known| known == &id) {
+                    authorized.push(id);
+                }
+            }
+            let scope = UsageScope { authorized };
+            state_write.custody.insert(artifact_key, scope.clone());
+            scope
+        }
+    };
 
     if dev_loopback_present_enabled() && same_sa_endpoint(&own_url, &target_endpoint.url) {
         match loopback_present_subject_cii(
@@ -164,6 +214,7 @@ pub async fn present_passport_handler(
         req.credential_external_id.as_deref(),
         &req.source_pod_key,
         req.citizen_id,
+        &usage_scope,
     )
     .await
     {
@@ -314,4 +365,31 @@ async fn loopback_present_subject_cii(
     );
     let subject_cii = state_read.gii.derive_subject_cii(&ctx, subject_id);
     Ok(subject_cii.0)
+}
+
+fn refuse_unless_scope_allows(
+    audit: fstp_core::audit::AuditLog,
+    scope: &UsageScope,
+    recipient: &ContextualId,
+) -> Result<(), String> {
+    let composing = SaTransaction::<Idle>::begin(audit)
+        .start_validation()
+        .validate(&ValidationContext {
+            sender_cii: recipient.clone(),
+            expected_cii: recipient.clone(),
+            timestamp: chrono::Utc::now(),
+            replay_window_secs: 300,
+        })
+        .map_err(|_| "VALIDATION_FAILED".to_string())?;
+    let artifact = SaOutboundArtifact::FederationControl {
+        control_type: FederationControlType::Establish,
+        from_cii: recipient.clone(),
+        to_cii: recipient.clone(),
+        link_id: uuid::Uuid::nil(),
+        signature: Ed25519Sig(ed25519_dalek::Signature::from_bytes(&[0u8; 64])),
+    };
+    composing
+        .compose_reemission(artifact, scope, recipient, false)
+        .map(|_| ())
+        .map_err(|_| "REEMISSION_REFUSED".to_string())
 }

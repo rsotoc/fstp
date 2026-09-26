@@ -125,7 +125,7 @@ Signed frontier exchange uses `NodeSigner` (`fstp-core/src/crypto.rs`). Trusted 
 
 | Endpoint | Auth | Purpose |
 |----------|------|---------|
-| `POST /pod-agent/v1/federation/present-passport` | `X-Pod-Agent-Key` | HU-06: Velyzor → source SA → target `present-credential` |
+| `POST /pod-agent/v1/federation/present-passport` | `X-Pod-Agent-Key` | Velyzor → source SA → target `present-credential`. Optional `authorizedRecipients` widens who may receive a later presentation of the same credential. A repeat toward anyone else returns `REEMISSION_REFUSED`. The recorded scope is in memory on the SA. |
 | `POST /fstp/admin/sync?link_id=…` | `X-Pod-Agent-Key` | Trigger O(Δ) frontier sync with a registered peer |
 | `POST /fstp/admin/peers` | `X-Pod-Agent-Key` | Register peer DID, endpoint, TLS fingerprint |
 

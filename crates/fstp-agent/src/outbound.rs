@@ -18,6 +18,7 @@ pub struct OutboundPresentCredentialRequest {
     pub issuer_did: String,
     pub validity: CredentialValidity,
     pub signature_hex: String,
+    pub usage_scope: fstp_core::message::UsageScope,
 }
 
 #[derive(Debug, Deserialize)]
@@ -42,6 +43,7 @@ fn present_signable_bytes(req: &OutboundPresentCredentialRequest) -> Result<Vec<
         claims: &'a serde_json::Value,
         issuer_did: &'a str,
         validity: &'a CredentialValidity,
+        usage_scope: &'a fstp_core::message::UsageScope,
     }
     let inner = Signable {
         link_id: req.link_id,
@@ -51,6 +53,7 @@ fn present_signable_bytes(req: &OutboundPresentCredentialRequest) -> Result<Vec<
         claims: &req.claims,
         issuer_did: &req.issuer_did,
         validity: &req.validity,
+        usage_scope: &req.usage_scope,
     };
     serde_json::to_vec(&inner).map_err(FstpError::SerializationError)
 }
@@ -67,6 +70,7 @@ pub async fn present_credential_to_peer(
     credential_external_id: Option<&str>,
     source_pod_key: &str,
     citizen_id: i64,
+    usage_scope: &fstp_core::message::UsageScope,
 ) -> Result<PresentCredentialOutcome> {
     let now = Utc::now();
     let claims = serde_json::json!({
@@ -88,6 +92,7 @@ pub async fn present_credential_to_peer(
             valid_until: now + Duration::days(365),
         },
         signature_hex: String::new(),
+        usage_scope: usage_scope.clone(),
     };
 
     let signable = present_signable_bytes(&req)?;

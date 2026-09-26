@@ -443,6 +443,8 @@ pub struct PresentCredentialRequest {
     pub issuer_did: String,
     pub validity: CredentialValidity,
     pub signature_hex: String,
+    #[serde(default)]
+    pub usage_scope: fstp_core::message::UsageScope,
 }
 
 #[derive(Debug, serde::Serialize)]
@@ -454,6 +456,7 @@ struct PresentCredentialSignable<'a> {
     claims: &'a serde_json::Value,
     issuer_did: &'a str,
     validity: &'a CredentialValidity,
+    usage_scope: &'a fstp_core::message::UsageScope,
 }
 
 /// **POST /fstp/present-credential**
@@ -477,6 +480,7 @@ pub async fn present_credential_handler(
         claims: &req.claims,
         issuer_did: &req.issuer_did,
         validity: &req.validity,
+        usage_scope: &req.usage_scope,
     }) {
         Ok(b) => b,
         Err(_) => {
@@ -570,6 +574,15 @@ pub async fn present_credential_handler(
         signature,
     };
     let transmitting = composing.compose(artifact);
+    {
+        let key = custody_key_from_claims(&req.claims)
+            .unwrap_or_else(|| format!("{}", Sha256Hash::digest(&signable)));
+        let mut state_write = state.write().await;
+        state_write
+            .custody
+            .entry(key)
+            .or_insert_with(|| req.usage_scope.clone());
+    }
     let (logging_tx, _) = transmitting.record_transmission(TransmitOutcome::Sent);
     let record = OperationRecord {
         operation_id: logging_tx.operation_id,
@@ -902,4 +915,13 @@ fn parse_ed25519_sig_hex(hex_str: &str) -> Result<Ed25519Sig, StatusCode> {
     let bytes = hex::decode(hex_str.trim()).map_err(|_| StatusCode::BAD_REQUEST)?;
     let sig = ed25519_dalek::Signature::from_slice(&bytes).map_err(|_| StatusCode::BAD_REQUEST)?;
     Ok(Ed25519Sig(sig))
+}
+
+fn custody_key_from_claims(claims: &serde_json::Value) -> Option<String> {
+    claims
+        .get("credentialExternalId")
+        .and_then(|v| v.as_str())
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
 }

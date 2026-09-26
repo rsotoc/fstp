@@ -38,6 +38,8 @@ use crate::blocklace::Block;
 use crate::message::{AggregateAttrs, EventClass};
 use crate::types::{ContextualId, Ed25519Sig, FstpError, LinkId, Result, Sha256Hash};
 
+pub use crate::message::UsageScope;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // State markers (zero-size types — erased at compile time)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -272,6 +274,31 @@ impl SaTransaction<Composing> {
         }
     }
 
+    /// Re-emit a held `D_pub` artifact toward `recipient` (Property: bounded re-emission).
+    ///
+    /// First emission uses [`Self::compose`]. A conforming agent re-emits only when
+    /// the artifact's usage scope already names the recipient, or Governance records
+    /// a fresh grant that extends the scope. Otherwise the transaction logs and refuses.
+    pub fn compose_reemission(
+        self,
+        artifact: SaOutboundArtifact,
+        scope: &UsageScope,
+        recipient: &ContextualId,
+        governance_extends: bool,
+    ) -> std::result::Result<SaTransaction<Transmitting>, (SaTransaction<Logging>, FstpError)>
+    {
+        if scope.authorizes(recipient) || governance_extends {
+            return Ok(self.compose(artifact));
+        }
+        let logging = SaTransaction {
+            operation_id: self.operation_id,
+            started_at: self.started_at,
+            audit: self.audit,
+            _state: PhantomData,
+        };
+        Err((logging, FstpError::ReemissionRefused))
+    }
+
     /// For inbound-only operations (e.g. block reception) where no artifact
     /// is emitted to the network. Skips Transmitting and goes directly to
     /// Logging. The audit record is still written via `log_and_complete`.
@@ -477,7 +504,7 @@ where
 mod tests {
     use super::*;
     use crate::audit::AuditLog;
-    use crate::types::ContextualId;
+    use crate::types::{ContextualId, FstpError};
     use chrono::Utc;
 
     fn valid_ctx(cii: &str) -> ValidationContext {
@@ -523,6 +550,62 @@ mod tests {
         };
         let _idle = tx.log_and_complete(record);
         // If this compiles and runs, the state machine enforces the transition order.
+    }
+
+    fn sample_artifact() -> SaOutboundArtifact {
+        SaOutboundArtifact::FederationControl {
+            control_type: FederationControlType::Establish,
+            from_cii: ContextualId::new("cii:local"),
+            to_cii: ContextualId::new("cii:peer"),
+            link_id: uuid::Uuid::new_v4(),
+            signature: crate::types::Ed25519Sig(ed25519_dalek::Signature::from_bytes(&[0u8; 64])),
+        }
+    }
+
+    fn composing_tx() -> SaTransaction<Composing> {
+        SaTransaction::<Idle>::begin(AuditLog::new())
+            .start_validation()
+            .validate(&valid_ctx("cii:peer"))
+            .expect("valid ctx")
+    }
+
+    #[test]
+    fn reemission_refuses_a_recipient_outside_the_scope() {
+        let scope = UsageScope {
+            authorized: vec![ContextualId::new("cii:known")],
+        };
+        let err = composing_tx()
+            .compose_reemission(
+                sample_artifact(),
+                &scope,
+                &ContextualId::new("cii:stranger"),
+                false,
+            )
+            .expect_err("stranger must be refused");
+        assert!(matches!(err.1, FstpError::ReemissionRefused));
+    }
+
+    #[test]
+    fn reemission_allows_a_named_recipient_or_a_fresh_grant() {
+        let scope = UsageScope {
+            authorized: vec![ContextualId::new("cii:known")],
+        };
+        composing_tx()
+            .compose_reemission(
+                sample_artifact(),
+                &scope,
+                &ContextualId::new("cii:known"),
+                false,
+            )
+            .expect("named recipient");
+        composing_tx()
+            .compose_reemission(
+                sample_artifact(),
+                &scope,
+                &ContextualId::new("cii:stranger"),
+                true,
+            )
+            .expect("fresh grant extends the scope");
     }
 
     /// Error path: CII mismatch causes Validating → Logging (skipping Composing/Transmitting).

@@ -274,6 +274,20 @@
 		m \;\cap\; \Draw \;=\; \emptyset.
 		\]
 	\end{property}
+
+	\begin{property}[Bounded re-emission]
+		\label{prop:reemission}
+		Let $d \in \Dpub$ be emitted by node $A$ to node $B$ under a usage
+		scope $\sigma$ carried in $d$'s typed metadata envelope. For every
+		conforming node $B$: if $B$'s synchronization agent emits $d$, or an
+		artifact derived from $d$, toward a third node $C$, then either
+		$\sigma$ authorizes $C$, or Governance for the underlying assertion
+		records a fresh grant extending $\sigma$ to $C$. Absent one of these,
+		a conforming $B$ refuses the re-emission. The property binds a
+		conforming agent, under the same threat-model boundary as
+		Property~\ref{prop:confinement}: it does not bind an operator who
+		runs modified code (Section~\ref{sec:threat}).
+	\end{property}
 	
 	\begin{figure}[h]
 		\centering
@@ -1361,7 +1375,10 @@
 	The \textbf{synchronization agent} enforces
 	Property~\ref{prop:confinement}---no raw internal data in any
 	federation message---as a compile-time structural guarantee implemented
-	through Rust's exhaustive \texttt{enum} pattern matching. The
+	through Rust's exhaustive \texttt{enum} pattern matching, and
+	Property~\ref{prop:reemission}---a conforming agent re-emits a received
+	artifact only when the usage scope or a fresh governance grant
+	authorizes the next recipient. The
 	\textbf{contextual identity model} provides unlinkable per-relationship
 	identities and minimum-disclosure credential presentation
 	(Properties~\ref{prop:isolation} and~\ref{prop:mindisclosure}),

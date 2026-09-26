@@ -217,6 +217,9 @@ pub enum FstpError {
     #[error("confinement violation: attempted to emit a D_raw value")]
     ConfinementViolation,
 
+    #[error("re-emission refused: usage scope does not authorize the recipient and no fresh grant extends it")]
+    ReemissionRefused,
+
     #[error("message rejected: {0:?}")]
     MessageRejected(RejectionReason),
 

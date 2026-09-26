@@ -24,6 +24,31 @@ use uuid::Uuid;
 pub(crate) use crate::blocklace::AggregateAttrs;
 use crate::types::{ContextualId, Ed25519Sig, FederationEndpoint, PublicKey, Sha256Hash};
 
+/// Recipients a received artifact may be sent to again.
+///
+/// First emission records the scope. A later emission toward a recipient
+/// absent from this list is a re-emission and is refused unless Governance
+/// has extended the scope.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct UsageScope {
+    #[serde(default)]
+    pub authorized: Vec<ContextualId>,
+}
+
+impl UsageScope {
+    pub fn authorizes(&self, recipient: &ContextualId) -> bool {
+        self.authorized.iter().any(|id| id == recipient)
+    }
+}
+
+impl Default for UsageScope {
+    fn default() -> Self {
+        Self {
+            authorized: Vec::new(),
+        }
+    }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Discriminant enums
 // ─────────────────────────────────────────────────────────────────────────────

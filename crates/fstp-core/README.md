@@ -25,7 +25,7 @@ The `two_nodes` example runs a full Blocklace sync round with no HTTP, TLS, or n
 
 ## Auditing the confinement boundary
 
-Before federating with a peer, review [`src/message.rs`](src/message.rs) at the git tag you deploy. If `FstpMessage` has no `D_raw` fields and the crate compiles, confinement holds for all executions (see [arXiv:2607.00213](https://arxiv.org/abs/2607.00213), §3.1).
+Before federating with a peer, review [`src/message.rs`](src/message.rs) at the git tag you deploy. If `FstpMessage` has no `D_raw` fields and the crate compiles, confinement holds for all executions (see [arXiv:2607.00213](https://arxiv.org/abs/2607.00213), §3.1). Re-emission of a held credential is a second check, `SaTransaction::compose_reemission`, not a fifth message type.
 
 Full audit procedure: [CONTRIBUTING.md](https://github.com/rsotoc/fstp/blob/main/CONTRIBUTING.md).
 

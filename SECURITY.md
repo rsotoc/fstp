@@ -19,6 +19,7 @@ We aim to acknowledge reports within **5 business days** and provide a remediati
 ## What we consider in scope
 
 - Bypass of the closed `FstpMessage` output enumeration (`crates/fstp-core/src/message.rs`)
+- Re-emission of a received credential to a recipient outside the recorded usage scope (`compose_reemission`)
 - Leakage of `D_raw` through audit logs, HTTP/gRPC handlers, or Blocklace exports
 - Cryptographic weaknesses in CII derivation, frontier signing, or mTLS configuration defaults
 - Authentication/authorization flaws on federation or admin endpoints

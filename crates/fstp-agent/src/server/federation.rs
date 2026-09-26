@@ -110,6 +110,9 @@ pub struct ServerState {
 
     /// Shamir M-of-N governance (AGR-106).
     pub quorum_gate: crate::quorum_gate::QuorumGate,
+
+    /// Usage scopes recorded on first emission of a passport artifact (I8).
+    pub custody: std::collections::HashMap<String, fstp_core::message::UsageScope>,
 }
 
 impl ServerState {
@@ -171,6 +174,7 @@ impl ServerState {
             sync_policy,
             inbound_validator: InboundValidator::default(),
             quorum_gate: crate::quorum_gate::QuorumGate::default(),
+            custody: std::collections::HashMap::new(),
         }
     }
 
