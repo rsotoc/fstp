@@ -99,7 +99,10 @@
 		The central mechanism is a synchronization agent whose output type set
 		is formally closed. Raw internal data cannot appear in any federation
 		message because the constraint is enforced by the Rust type system at
-		compile time, not by a runtime check. A contextual identity model
+		compile time, not by a runtime check. A received artifact carries a
+		usage scope: a conforming agent refuses to re-emit it toward a third
+		node unless that scope, or a fresh governance grant, authorizes the
+		recipient. A contextual identity model
 		derives a separate, unlinkable identifier for each federation
 		relationship, preventing cross-context correlation structurally. A
 		Blocklace-based event substrate~\cite{shapiro2023grassroots,keidar2023cordial}

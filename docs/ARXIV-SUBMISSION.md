@@ -2,7 +2,49 @@
 
 **Published:** [arXiv:2607.00213](https://arxiv.org/abs/2607.00213) · DOI [10.48550/arXiv.2607.00213](https://doi.org/10.48550/arXiv.2607.00213)
 
-Historical checklist and copy-paste metadata used for the initial submission (July 2026).
+The identifier stays. This file now has two parts: the **replacement** to upload (September 2026), and the historical checklist of the original submission.
+
+## Replacement — September 2026
+
+This revision adds **bounded re-emission**: a conforming agent refuses to send a received artifact to a third node unless the artifact's usage scope, or a fresh governance grant, authorizes that recipient. The DOI and the arXiv identifier do not change.
+
+### What to upload
+
+| File | Where it is |
+|------|-------------|
+| Main PDF | `docs/FSTP-techPaper.pdf` (27 pages) |
+| Source | `docs/arxiv/fstp-arxiv-source.tar.gz` |
+
+Rebuild before a later upload: `cd docs && pdflatex FSTP-techPaper.tex` twice, then `../scripts/build-arxiv-bundle.sh`. Confirm the PDF has no red `[TODO]` (the `\todo` command in the preamble is unused). Four figures remain.
+
+### How to replace on arXiv
+
+1. Log in → your papers → [arXiv:2607.00213](https://arxiv.org/abs/2607.00213) → **Replace**.
+2. Upload `FSTP-techPaper.pdf`, then `fstp-arxiv-source.tar.gz`.
+3. Replace the abstract and the comments with the blocks below. Title, authors, `cs.CR`, and cross-list `cs.DC` stay.
+4. Preview the compiled PDF (figures and author list), then submit the replacement.
+
+### Abstract (plain text — no LaTeX)
+
+```
+This paper introduces the Federated Sovereign Transport Protocol (FSTP), a synchronization boundary and transport layer for federated networks in which nodes have heterogeneous privacy requirements. Existing federation protocols leave data confinement to operator policy: they define message formats and delivery semantics but impose no structural constraint on what a conforming server may emit. FSTP addresses this gap by making data confinement a property of the protocol itself.
+
+The central mechanism is a synchronization agent whose output type set is formally closed. Raw internal data cannot appear in any federation message because the constraint is enforced by the Rust type system at compile time, not by a runtime check. A received artifact carries a usage scope: a conforming agent refuses to re-emit it toward a third node unless that scope, or a fresh governance grant, authorizes the recipient. A contextual identity model derives a separate, unlinkable identifier for each federation relationship, preventing cross-context correlation structurally. A Blocklace-based event substrate provides tamper-evident, partially ordered logging with synchronization cost proportional to the symmetric difference between node states, and supports data erasure without breaking the hash chain.
+
+The result is proof without exposure: a federation participant can verify that a process occurred, that a credential is authentic, and that an outcome is uncorrupted without accessing the internal data that produced these artifacts. FSTP is developed as the inter-node transport layer of Velyzor, a governance platform for institutions with demanding confidentiality requirements. The specification and reference implementation are released as open-source infrastructure under Apache 2.0; source code and figures accompany this paper.
+```
+
+### Comments
+
+```
+27 pages, 4 figures. Replacement adding bounded re-emission. Reference implementation: https://github.com/rsotoc/fstp
+```
+
+---
+
+## Original submission (July 2026) — kept for the record
+
+Historical checklist and copy-paste metadata used for the initial submission.
 
 ## Before you submit
 
